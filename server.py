@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from weather import weather_city
-
+from python_org_news import get_python_news
 app = Flask(__name__)
 
 
@@ -28,6 +28,13 @@ def weather(city='Barcelona, Spain'):
     # pprint(weather)
     return render_template('weather.html', page_title=title, current_city=current_city, current_weather=current_weather,
                            months=months, menu=menu)
+
+
+@app.route('/news')
+def news():
+    title = 'Python News'
+    news_list = get_python_news(local=False)
+    return render_template('news.html', page_title=title, news_list=news_list, menu=menu)
 
 
 if __name__ == "__main__":
