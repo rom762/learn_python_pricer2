@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block content %}
+{{ super() }}
+<div class="container">
+    <div class="row"> <!-- current weather -->
+        {% if current_weather %}
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+            {% if current_city %}
+            <h3>{{ current_city }} Weather Now</h3>
+            {% endif %}
+            <div id="outlook_div_wxs">
+            <div class="row mt-3">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-4 text-left">
+                    <img class="wwo-small-logo" width="128" height="128" src="{{ current_weather['weatherIconUrl'][0]['value'] }}"
+                         alt="{{ current_weather['weatherDesc'][0]['value'] }}" title="{{ current_weather['weatherDesc'][0]['value'] }}">
+                </div>
+                <div class="col-lg-8 col-md-8 col-sm-8 col-8">
+                    <p class="h3">{{ current_weather['temp_C'] }} °c</p>
+                    <p class="mt-0 mb-0">{{ current_weather['weatherDesc'][0]['value'] }}</p>
+                    <p class="mt-0 mb-0">Wind {{ current_weather['windspeedKmph'] }} km/h from {{ current_weather['winddir16Point'] }}
+                        <i class="wi wi-wind wi-from-sw"></i></p>
+                    <p class="mt-0 mb-0">Rain 0.0 mm</p>
+                </div>
+            </div>
+            <div class="row border-bottom">
+                <div class="col-4">
+                    <dl class="row">
+                        <dt class="col-sm-12">Humidity</dt>
+                        <dd class="col-sm-12">{{ current_weather['humidity'] }}</dd>
+                        <dt class="col-sm-12">Cloud</dt>
+                        <dd class="col-sm-12">{{ current_weather['cloudcover'] }}</dd>
+                        <dt class="col-sm-12">Pressure</dt>
+                        <dd class="col-sm-12">{{ current_weather['pressure'] }} mb</dd>
+                    </dl>
+                </div>
+                <div class="col-4">
+                    <dl class="row">
+                        <dt class="col-sm-12">Sunrise</dt>
+                        <dd class="col-sm-12">07:21 AM</dd>
+                        <dt class="col-sm-12">Moonrise</dt>
+                        <dd class="col-sm-12">08:57 PM</dd>
+                        <dt class="col-sm-12">Phase</dt>
+                        <dd class="col-sm-12">
+                            <i class="wi wi-moon-last-quarter" style="font-size:38px;"></i>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-4">
+                    <dl class="row">
+                        <dt class="col-sm-12">Sunset</dt>
+                        <dd class="col-sm-12">06:04 PM</dd>
+                        <dt class="col-sm-12">Moonset</dt>
+                        <dd class="col-sm-12">08:32 AM</dd>
+                        <dt class="col-sm-12">Illum</dt>
+                        <dd class="col-sm-12">69.0</dd>
+                    </dl>
+                </div>
+            </div>
+            </div>
+            <div class="row">
+                <div class="col">7 pm</div>
+                <div class="col">8 pm</div>
+                <div class="col">9 pm</div>
+                <div class="col">10 pm</div>
+                <div class="col d-none d-sm-block">11 pm</div>
+                <div class="col d-none d-sm-block">12 am</div>
+                <div class="col d-none d-sm-block">1 am</div>
+                <div class="w-100"></div>
+                <div class="col">
+                    <img src="//cdn.worldweatheronline.com/images/weather/small/122_night_sm.png" alt="Overcast" class="wwo-logo-small" width="32" height="32" loading="lazy" data-pagespeed-url-hash="3582064497" onload="pagespeed.CriticalImages.checkImageForCriticality(this);">
+                </div>
+                <div class="col">
+                    <img src="//cdn.worldweatheronline.com/images/weather/small/122_night_sm.png" alt="Overcast" class="wwo-logo-small" width="32" height="32" loading="lazy" data-pagespeed-url-hash="3582064497" onload="pagespeed.CriticalImages.checkImageForCriticality(this);"></div><div class="col"><img src="//cdn.worldweatheronline.com/images/weather/small/122_night_sm.png" alt="Overcast" class="wwo-logo-small" width="32" height="32" loading="lazy" data-pagespeed-url-hash="3582064497" onload="pagespeed.CriticalImages.checkImageForCriticality(this);"></div><div class="col"><img src="//cdn.worldweatheronline.com/images/weather/small/122_night_sm.png" alt="Overcast" class="wwo-logo-small" width="32" height="32" loading="lazy" data-pagespeed-url-hash="3582064497" onload="pagespeed.CriticalImages.checkImageForCriticality(this);"></div><div class="col d-none d-sm-block"><img src="//cdn.worldweatheronline.com/images/weather/small/122_night_sm.png" alt="Overcast" class="wwo-logo-small" width="32" height="32" loading="lazy" data-pagespeed-url-hash="3582064497" onload="pagespeed.CriticalImages.checkImageForCriticality(this);"></div><div class="col d-none d-sm-block"><img src="//cdn.worldweatheronline.com/images/weather/small/122_night_sm.png" alt="Overcast" class="wwo-logo-small" width="32" height="32" loading="lazy" data-pagespeed-url-hash="3582064497" onload="pagespeed.CriticalImages.checkImageForCriticality(this);"></div><div class="col d-none d-sm-block"><img src="//cdn.worldweatheronline.com/images/weather/small/122_night_sm.png" alt="Overcast" class="wwo-logo-small" width="32" height="32" loading="lazy" data-pagespeed-url-hash="3582064497" onload="pagespeed.CriticalImages.checkImageForCriticality(this);">
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+            <h3>Сервис погоды временно недоступен :-(</h3>
+        </div>
+        {% endif %}
+    </div>
+    {% if months %}
+    <h3 class="pt-5 pb-2">Средне-месячные значения:</h3>
+    <div class="row">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#ID</th>
+                    <th scope="col">Month</th>
+                    <th scope="col">absMaxTemp</th>
+                    <th scope="col">avgDailyRainfall</th>
+                    <th scope="col">avgMinTemp</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for month in months %}
+                <tr>
+                    <th scope="row">{{ month['index'] }}</th>
+                    <td>{{ month['name'] }}</td>
+                    <td>{{ month['absMaxTemp'] }}</td>
+                    <td>{{ month['avgDailyRainfall'] }}</td>
+                    <td>{{ month['avgMinTemp'] }}</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
