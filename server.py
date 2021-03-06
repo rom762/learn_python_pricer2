@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # временно, чтобы не вылетали Deprecation
 
 db = SQLAlchemy(app)
-login_manager = LoginManager(app)
+# login_manager = LoginManager(app)
 
 
 menu = {
@@ -32,7 +32,6 @@ def index():
         print(len(users))
     else:
         print('we lost users')
-    news_list = get_python_news(local=True)
     return render_template('index.html', page_title=title, users=users, menu=menu)
 
 
@@ -87,6 +86,7 @@ def register():
 def login():
     return render_template('login.html', menu=menu, title='Авторизация')
 
+
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), unique=True)
@@ -97,6 +97,9 @@ class Users(db.Model):
 
     def __repr__(self):
         return f'<users {self.id}>'
+
+    def getUser(self):
+        return self
 
 
 class Profiles(db.Model):
