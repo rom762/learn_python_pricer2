@@ -1,15 +1,28 @@
 import csv
+import time
+
 from webapp.model import db, GPU
 from webapp import create_app
 
 
 def read_csv(filename='citilink.csv'):
     with open(filename, 'r', encoding='utf-8') as ff:
-        fields = ['id', 'categoryId', 'price', 'oldPrice', 'shortName',
+        fields = ['citilink_id', 'categoryId', 'price', 'oldPrice', 'shortName',
                   'categoryName', 'brandName', 'clubPrice', 'picture']
         reader = csv.DictReader(ff, fields, delimiter=';')
+        video_cards = []
         for row in reader:
-            save_gpu_data(row)
+            try:
+                row['price'] = float(row['price'])
+                video_cards.append(row)
+            except (ValueError, AttributeError) as exp:
+                print(exp, exp.args)
+        save_gpu_data2(video_cards)
+
+
+def save_gpu_data2(data):
+    db.session.bulk_insert_mappings(GPU, data)
+    db.session.commit()
 
 
 def save_gpu_data(row):
@@ -28,4 +41,7 @@ def save_gpu_data(row):
 if __name__ == '__main__':
     app = create_app()
     with app.app_context():
+        start = time.perf_counter()
         read_csv()
+        end = time.perf_counter() - start
+        print(f'Загрузка заняла: {end} секунд')
