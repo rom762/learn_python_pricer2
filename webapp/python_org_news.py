@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from pathlib import Path
+from flask import current_app
 
 
 def get_html(url, save=True):
@@ -8,7 +9,7 @@ def get_html(url, save=True):
         result = requests.get(url)
         result.raise_for_status()
         if save:
-            with open('python_org.html', 'w') as f:
+            with open('../python_org.html', 'w') as f:
                 f.write(result.text)
         return result.text
     except(requests.RequestException, ValueError):
@@ -17,11 +18,11 @@ def get_html(url, save=True):
 
 def get_python_news(local=True):
     if local:
-        filename = Path("python_org.html")
+        filename = Path("../python_org.html")
         with open(filename, 'r') as f:
             html = f.read()
     else:
-        html = get_html("https://www.python.org/blogs")
+        html = get_html(current_app.config['NEWS_URL'])
 
     if html:
         soup = BeautifulSoup(html, 'html.parser')

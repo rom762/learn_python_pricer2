@@ -15,7 +15,7 @@
             <ul class="list-group">
                 {% for news in news_list %}
                 <li class="list-group-item">
-                    <h6><a href="{{ news.url }}">{{ news.title }}</a></h6>
+                    <h6><a href="{{ news.url }}" target="_blank">{{ news.title }}</a></h6>
                     <p>{{ news.published }}</p>
                 </li>
                 {% endfor %}

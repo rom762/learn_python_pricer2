@@ -1,5 +1,5 @@
 import requests
-import settings
+from webapp import settings
 from pprint import pprint
 
 

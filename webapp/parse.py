@@ -58,13 +58,13 @@ def save_page(url='https://www.citilink.ru/catalog/videokarty/?p='):
     response = requests.get(url)
     if response.status_code == 200:
         html = response.text
-        with open('citilink.html', 'w') as ff:
+        with open('../citilink.html', 'w') as ff:
             ff.write(html)
             print('done!')
 
 # save_page()
 def get_local_citilink():
-    with open('citilink.html', 'r', encoding='cp1251') as ff:
+    with open('../citilink.html', 'r', encoding='cp1251') as ff:
         return BeautifulSoup(ff.read(), 'html.parser')
 
 
