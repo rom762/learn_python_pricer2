@@ -5,7 +5,7 @@ from webapp.weather import weather_city
 from webapp.python_org_news import get_python_news
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from webapp.model import db, Users, Profiles, News
+from webapp.model import db, Users, Profiles, News, GPU
 
 
 def create_app():
@@ -19,6 +19,7 @@ def create_app():
         'News': '/news',
         'Weather': '/weather',
         'Register': '/register',
+        'GPU': '/gpu',
         # 'Авторизация': '/login',
     }
 
@@ -81,6 +82,11 @@ def create_app():
     @app.route('/login')
     def login():
         return render_template('login.html', menu=menu, title='Авторизация')
+
+    @app.route('/gpu')
+    def gpu():
+        gpus = GPU.query.all()
+        return render_template('gpu.html', menu=menu, title='Видеокарты', gpus=gpus)
 
     return app
 #

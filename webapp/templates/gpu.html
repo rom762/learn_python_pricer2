@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+{{ super() }}
+<div class="container">
+    {% if gpus %}
+    <div class="row">
+        <div class="col">
+            <h1>GPU prices:</h1>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#ID</th>
+                        <th scope="col">Model</th>
+                        <th scope="col">Brand Name</th>
+                        <th scope="col">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for gpu in gpus %}
+                    <tr>
+                        <th scope="row">{{ gpu['citilink_id'] }}</th>
+                        <td>{{ gpu['shortName'] }}</td>
+                        <td>{{ gpu['brandName'] }}</td>
+                        <td>{{ gpu['price'] }}</td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <h1>Сервис временно недоступен. Попробуйте позднее.</h1>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+
+
