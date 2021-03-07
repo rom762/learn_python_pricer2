@@ -16,7 +16,7 @@
                 {% for news in news_list %}
                 <li class="list-group-item">
                     <h6><a href="{{ news.url }}" target="_blank">{{ news.title }}</a></h6>
-                    <p>{{ news.published }}</p>
+                    <p>{{ news.published.strftime('%d.%m.%Y') }}</p>
                 </li>
                 {% endfor %}
             </ul>

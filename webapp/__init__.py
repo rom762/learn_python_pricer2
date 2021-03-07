@@ -5,13 +5,14 @@ from webapp.weather import weather_city
 from webapp.python_org_news import get_python_news
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from webapp.model import db, Users, Profiles, News
 
 
 def create_app():
     app = Flask(__name__)
     app.secret_key = os.urandom(24)
     app.config.from_pyfile("settings.py")
-    db = SQLAlchemy(app)
+    db.init_app(app)
 
     menu = {
         'Home': '/',
@@ -22,6 +23,7 @@ def create_app():
     }
 
     @app.route('/')
+    @app.route('/index')
     def index():
         title = 'Pricer'
         users = Users.query.all()
@@ -46,7 +48,7 @@ def create_app():
     @app.route('/news')
     def news():
         title = 'Python News'
-        news_list = get_python_news(local=False)
+        news_list = News.query.order_by(News.published.desc()).all()
         return render_template('news.html', page_title=title, news_list=news_list, menu=menu)
 
     @app.route('/register', methods=('POST', 'GET'))
@@ -68,7 +70,7 @@ def create_app():
 
                 print('user added to the base')
                 flash('User registered successfully', 'success')
-                return redirect(url_for('/'))
+                return redirect(url_for('index'))
 
             except Exception as exp:
                 db.session.rollback()  # откатываем изменения
@@ -79,32 +81,6 @@ def create_app():
     @app.route('/login')
     def login():
         return render_template('login.html', menu=menu, title='Авторизация')
-
-    class Users(db.Model):
-        id = db.Column(db.Integer, primary_key=True)
-        email = db.Column(db.String(50), unique=True)
-        psw = db.Column(db.String(500), nullable=True)  # не пустое, под хеш пароля
-        date = db.Column(db.DateTime, default=datetime.utcnow)
-
-        pr = db.relationship('Profiles', backref='users', uselist=False)
-
-        def __repr__(self):
-            return f'<users {self.id}>'
-
-        def getUser(self):
-            return self
-
-    class Profiles(db.Model):
-        id = db.Column(db.Integer, primary_key=True)
-        firstname = db.Column(db.String(50), nullable=True)
-        lastname = db.Column(db.String(50), nullable=True)
-        city = db.Column(db.String(100))
-
-        user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
-        def __repr__(self):
-            return f'<profiles {self.id}>'
-
 
     return app
 #
