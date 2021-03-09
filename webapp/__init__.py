@@ -37,11 +37,11 @@ def create_app():
     @app.route('/weather')
     def weather(city='Barcelona, Spain'):
         title = f'Weather in {city}'
-        weather = weather_city(city_name=city)
-        current_city = weather['data']['request'][0]['query']
-        current_weather = weather['data']['current_condition'][0]
-        months = weather['data']['ClimateAverages'][0]['month']
-        # pprint(weather)
+        weather = weather_city(city_name=city)['data']
+        current_city = weather['request'][0]['query']
+        current_weather = weather['current_condition'][0]
+        months = weather['ClimateAverages'][0]['month']
+
         return render_template('weather.html', page_title=title, current_city=current_city,
                                current_weather=current_weather,
                                months=months, menu=menu)

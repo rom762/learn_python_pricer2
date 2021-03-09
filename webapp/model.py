@@ -45,13 +45,13 @@ class Profiles(db.Model):
 class GPU(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     citilink_id = db.Column(db.Integer, nullable=False)
-    categoryId = db.Column(db.Integer, nullable=False)
+    category_id = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
-    oldPrice = db.Column(db.Float, nullable=False)
-    shortName = db.Column(db.String, nullable=False)
-    categoryName = db.Column(db.String, nullable=False)
-    brandName = db.Column(db.String, nullable=False)
-    clubPrice = db.Column(db.String, nullable=True)
+    old_price = db.Column(db.Float, nullable=False)
+    short_name = db.Column(db.String, nullable=False)
+    category_name = db.Column(db.String, nullable=False)
+    brand_name = db.Column(db.String, nullable=False)
+    club_price = db.Column(db.String, nullable=True)
     picture = db.Column(db.String, nullable=False)
 
     def __repr__(self):

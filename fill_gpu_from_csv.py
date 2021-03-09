@@ -7,8 +7,11 @@ from webapp import create_app
 
 def read_csv(filename='citilink.csv'):
     with open(filename, 'r', encoding='utf-8') as ff:
-        fields = ['citilink_id', 'categoryId', 'price', 'oldPrice', 'shortName',
-                  'categoryName', 'brandName', 'clubPrice', 'picture']
+        # fields = ['citilink_id', 'categoryId', 'price', 'oldPrice', 'shortName',
+        #           'categoryName', 'brandName', 'clubPrice', 'picture']
+        fields = ['citilink_id', 'category_id', 'price', 'old_price', 'short_name',
+                  'category_name', 'brand_name', 'club_price', 'picture']
+
         reader = csv.DictReader(ff, fields, delimiter=';')
         video_cards = []
         for row in reader:

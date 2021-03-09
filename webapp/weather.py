@@ -15,21 +15,18 @@ def weather_city(city_name='Moscow,Russia'):
     try:
         response = requests.get(url, params)
         print(f'Weather source response.status_code {response.status_code}')
+    except requests.RequestException:
+        print('Сетевая ошибка')
+        return None
+
+    try:
         weather = response.json()
-        # pprint(weather)
-        # months = weather['data']['ClimateAverages'][0]['month']
-        # pprint(months)
         if 'data' in weather:
             if 'current_condition' in weather['data']:
-                try:
-                    #return weather['data']['current_condition'][0]
-                    return weather
-                except (IndexError, TypeError):
-                    return False
-    except(requests.RequestException):
-        print('Сетевая ошибка')
-        return False
-    return False
+                return weather
+    except (IndexError, TypeError) as exp:
+        print(exp, exp.args)
+        return None
 
 
 if __name__ == '__main__':
