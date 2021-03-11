@@ -1,3 +1,5 @@
+import enum
+
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -23,11 +25,11 @@ class Users(db.Model):
 
     pr = db.relationship('Profiles', backref='users', uselist=False)
 
-    def __repr__(self):
-        return f'<users {self.id}>'
+    def __str__(self):
+        return f'<users {self.id, self.email, self.pr.firstname, self.pr.lastname, self.psw}>'
 
-    def getUser(self):
-        return self
+    def __repr__(self):
+        return {'id': self.id, 'email': self.email, 'psw' : self.psw}
 
 
 class Profiles(db.Model):

@@ -1,0 +1,7 @@
+.form-group {
+    margin-bottom: 10px;
+}
+
+p.own-logo:first-letter {
+    color:red;
+}

@@ -5,8 +5,10 @@ from webapp.weather import weather_city
 from webapp.python_org_news import get_python_news
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_login import LoginManager, login_user, login_required
 from webapp.model import db, Users, Profiles, News, GPU
-
+from webapp.UserLogin import UserLogin
+from webapp.queries import get_user_by_email
 
 def create_app():
     app = Flask(__name__)
@@ -14,13 +16,22 @@ def create_app():
     app.config.from_pyfile("settings.py")
     db.init_app(app)
 
+    login_manager = LoginManager(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        print('load user')
+        return UserLogin().fromDB(user_id, db)
+
+
+
     menu = {
         'Home': '/',
         'News': '/news',
         'Weather': '/weather',
         'Register': '/register',
         'GPU': '/gpu',
-        # 'Авторизация': '/login',
+        'Авторизация': '/login',
     }
 
     @app.route('/')
@@ -79,17 +90,24 @@ def create_app():
                 flash('something goes wrong!', 'error')
         return render_template('register.html', title='Registration', menu=menu)
 
-    @app.route('/login')
+    @app.route('/login', methods=['POST', 'GET'])
     def login():
+        if request.method == 'POST':
+            user = get_user_by_email(request.form['email'])
+            password = check_password_hash(user.psw, request.form['psw'])
+            if user and password:
+                user_login = UserLogin().create(user)
+
+                login_user(user_login)
+                return redirect(url_for('gpu'))
+            flash("Email or password is wrong.")
+
         return render_template('login.html', menu=menu, title='Авторизация')
 
     @app.route('/gpu')
+    @login_required
     def gpu():
         gpus = GPU.query.all()
         return render_template('gpu.html', menu=menu, title='Видеокарты', gpus=gpus)
 
     return app
-#
-# if __name__ == "__main__":
-#     app.secret_key = os.urandom(24)
-#     app.run(debug=True)
