@@ -18,7 +18,6 @@ def get_user_by_email(email):
     print(f'email: {email}')
     try:
         user = Users.query.filter(Users.email == email).first()
-
         if not user:
             print(f'user with email: {email} not found!')
             return None

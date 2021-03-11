@@ -5,10 +5,11 @@ from webapp.weather import weather_city
 from webapp.python_org_news import get_python_news
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from flask_login import LoginManager, login_user, login_required
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from webapp.model import db, Users, Profiles, News, GPU
 from webapp.UserLogin import UserLogin
-from webapp.queries import get_user_by_email
+from webapp.queries import get_user_by_email, get_user_by_id
+
 
 def create_app():
     app = Flask(__name__)
@@ -27,11 +28,12 @@ def create_app():
 
     menu = {
         'Home': '/',
-        'News': '/news',
-        'Weather': '/weather',
-        'Register': '/register',
         'GPU': '/gpu',
-        'Авторизация': '/login',
+        # 'News': '/news',
+        # 'Weather': '/weather',
+        'Register': '/register',
+        'Login': '/login',
+        'Profile': '/profile',
     }
 
     @app.route('/')
@@ -109,5 +111,23 @@ def create_app():
     def gpu():
         gpus = GPU.query.all()
         return render_template('gpu.html', menu=menu, title='Видеокарты', gpus=gpus)
+
+    @app.route('/logout')
+    @login_required
+    def logout():
+        logout_user()
+        flash('You are logged out')
+        return redirect(url_for('login'))
+
+    @app.route('/profile')
+    @login_required
+    def profile():
+        # return f"""<p><a href="{url_for('logout')}">Logout</a>
+        #             <p>user info: {current_user.get_id()}"""
+        print(f'profile user id: {current_user.get_id()}')
+        user = Users.query.filter(Users.id == current_user.get_id()).first()
+        print(f' test: {user.id}, {user.email}')
+        print(f' i am from profile {user}')
+        return render_template('profile.html', menu=menu, title='Profile', user=user)
 
     return app
