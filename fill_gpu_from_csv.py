@@ -1,8 +1,29 @@
 import csv
 import time
+from datetime import datetime
+from pprint import pprint
 
-from webapp.model import db, GPU
+from webapp.model import db, GPU, User
 from webapp import create_app
+
+
+def read_users(filename='profiles.csv'):
+    with open(filename, 'r', encoding='ansi') as ff:
+        fields = ['id', 'firstname', 'lastname', 'city', 'email', 'password', 'date', 'role']
+        reader = csv.DictReader(ff, fields, delimiter=';', )
+        users = []
+        for row in reader:
+            if row['email'] == 'email':
+                continue
+            # row.pop('date')
+            try:
+                row['date'] = datetime.strptime(row['date'], '%Y-%m-%d %H:%M%:%S.%f')
+            except ValueError:
+                row['date'] = datetime.now()
+            row.pop('id')
+
+            users.append(row)
+        return users
 
 
 def read_csv(filename='citilink.csv'):
@@ -23,8 +44,8 @@ def read_csv(filename='citilink.csv'):
         save_gpu_data2(video_cards)
 
 
-def save_gpu_data2(data):
-    db.session.bulk_insert_mappings(GPU, data)
+def save_gpu_data2(table, data):
+    db.session.bulk_insert_mappings(table, data)
     db.session.commit()
 
 
@@ -45,6 +66,9 @@ if __name__ == '__main__':
     app = create_app()
     with app.app_context():
         start = time.perf_counter()
-        read_csv()
+        users = read_users()
+        pprint(users)
+        db.session.bulk_insert_mappings(User, users)
+        db.session.commit()
         end = time.perf_counter() - start
         print(f'Загрузка заняла: {end} секунд')

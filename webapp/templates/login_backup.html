@@ -3,20 +3,16 @@
 {{ super() }}
 <div class="container">
     <div class="row">
+        <div class="col">
+            <h3>{{ title }}</h3>
+            {% for cat, msg in get_flashed_messages(True) %}
+            <div class="flash {{cat}}">{{msg}}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="row">
         <div class="col-4">
             <form action="" method="POST" class="form-contact">
-            <div class="form-group">
-                <label for="firstname">Firstname:</label><br>
-                <input type="text" name="firstname" value="" requied>
-            </div>
-            <div class="form-group">
-                <label for="lastname">Lastname:</label><br>
-                <input type="text" name="lastname" value="" requied>
-            </div>
-            <div class="form-group">
-                <label for="city">City:</label><br>
-                <input type="text" name="city" value="" requied>
-            </div>
             <div class="form-group">
                 <label for="email">Email address:</label>
                 <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">

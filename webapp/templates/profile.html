@@ -4,15 +4,6 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            <h3>{{ title }}</h3>
-            {% for cat, msg in get_flashed_messages(True) %}
-            <div class="flash {{cat}}">{{msg}}</div>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-
             <table class="table">
                 <thead>
                     <tr>
@@ -27,9 +18,9 @@
                 <tbody>
                     <tr>
                         <th scope="row">{{ user.id }}</th>
-                        <td>{{ user.pr.firstname.capitalize()}}</td>
-                        <td>{{ user.pr.lastname.capitalize()}}</td>
-                        <td>{{ user.pr.city.capitalize() }}</td>
+                        <td>{{ user.firstname.capitalize()}}</td>
+                        <td>{{ user.lastname.capitalize()}}</td>
+                        <td>{{ user.city.capitalize() }}</td>
                         <td>{{ user.email }}</td>
                         <td>
                             <a class="btn btn-primary" href="{{ url_for('logout') }}" role="button">Logout</a>

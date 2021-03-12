@@ -1,9 +1,9 @@
-from webapp.model import Users
+from webapp.model import User
 
 
 def get_user_by_id(user_id):
     try:
-        user = Users.query.filter(Users.id == user_id).first()
+        user = User.query.filter(User.id == user_id).first()
         if not user:
             print('user not found!')
             return None
@@ -17,7 +17,7 @@ def get_user_by_id(user_id):
 def get_user_by_email(email):
     print(f'email: {email}')
     try:
-        user = Users.query.filter(Users.email == email).first()
+        user = User.query.filter(User.email == email).first()
         if not user:
             print(f'user with email: {email} not found!')
             return None

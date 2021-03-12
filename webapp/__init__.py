@@ -6,9 +6,9 @@ from webapp.python_org_news import get_python_news
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from webapp.model import db, Users, Profiles, News, GPU
-from webapp.UserLogin import UserLogin
+from webapp.model import db, User, News, GPU
 from webapp.queries import get_user_by_email, get_user_by_id
+from webapp.forms import LoginForm
 
 
 def create_app():
@@ -18,11 +18,14 @@ def create_app():
     db.init_app(app)
 
     login_manager = LoginManager(app)
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'
+
 
     @login_manager.user_loader
     def load_user(user_id):
         print('load user')
-        return UserLogin().fromDB(user_id, db)
+        return User.query.get(user_id)
 
 
 
@@ -40,7 +43,7 @@ def create_app():
     @app.route('/index')
     def index():
         title = 'Pricer'
-        users = Users.query.all()
+        users = User.query.all()
         if users:
             print(len(users))
         else:
@@ -73,7 +76,8 @@ def create_app():
 
             try:
                 hash = generate_password_hash(request.form['psw'])
-                u = Users(email=request.form['email'], psw=hash)
+                u = User(email=request.form['email'], psw=hash)
+
                 db.session.add(u)
                 db.session.flush()  # пока в памяти
 
@@ -92,42 +96,44 @@ def create_app():
                 flash('something goes wrong!', 'error')
         return render_template('register.html', title='Registration', menu=menu)
 
-    @app.route('/login', methods=['POST', 'GET'])
+    @app.route('/login')
     def login():
-        if request.method == 'POST':
-            user = get_user_by_email(request.form['email'])
-            password = check_password_hash(user.psw, request.form['psw'])
-            if user and password:
-                user_login = UserLogin().create(user)
+        if current_user.is_authenticated:
+            flash('You are logged in', 'success')
+            return redirect(url_for('index'))
+        title = 'Login'
+        login_form = LoginForm()
+        return render_template('login.html', title=title, menu=menu, form=login_form)
 
-                login_user(user_login)
+    @app.route('/process-login', methods=['POST'])
+    def process_login():
+        login_form = LoginForm()
+        if login_form.validate_on_submit():
+            user = User.query.filter_by(email=login_form.email.data).first()
+            if user and user.check_password(login_form.password.data):
+                login_user(user)
+                flash('You are logged in', 'success')
                 return redirect(url_for('gpu'))
-            flash("Email or password is wrong.")
+        flash('Неправильное имя пользователя или пароль', 'warning')
+        return redirect(url_for('login'))
 
-        return render_template('login.html', menu=menu, title='Авторизация')
+    @app.route('/logout')
+    @login_required
+    def logout():
+        flash('You are logged out.', 'primary')
+        logout_user()
+        return redirect(url_for('login'))
+
+    @app.route('/profile')
+    @login_required
+    def profile():
+        user = User.query.filter(User.id == current_user.get_id()).first()
+        return render_template('profile.html', menu=menu, title='Profile', user=user)
 
     @app.route('/gpu')
     @login_required
     def gpu():
         gpus = GPU.query.all()
         return render_template('gpu.html', menu=menu, title='Видеокарты', gpus=gpus)
-
-    @app.route('/logout')
-    @login_required
-    def logout():
-        logout_user()
-        flash('You are logged out')
-        return redirect(url_for('login'))
-
-    @app.route('/profile')
-    @login_required
-    def profile():
-        # return f"""<p><a href="{url_for('logout')}">Logout</a>
-        #             <p>user info: {current_user.get_id()}"""
-        print(f'profile user id: {current_user.get_id()}')
-        user = Users.query.filter(Users.id == current_user.get_id()).first()
-        print(f' test: {user.id}, {user.email}')
-        print(f' i am from profile {user}')
-        return render_template('profile.html', menu=menu, title='Profile', user=user)
 
     return app
