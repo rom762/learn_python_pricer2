@@ -1,6 +1,8 @@
-import requests
-from webapp import settings
 from pprint import pprint
+
+import requests
+
+from webapp import settings
 
 
 def weather_city(city_name='Moscow,Russia'):

@@ -3,8 +3,8 @@ import time
 from datetime import datetime
 from pprint import pprint
 
-from webapp.model import db, GPU, User
 from webapp import create_app
+from webapp.model import GPU, User, db
 
 
 def read_users(filename='profiles.csv'):

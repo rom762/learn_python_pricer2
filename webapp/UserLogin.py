@@ -1,5 +1,6 @@
 from webapp.queries import get_user_by_id
 
+
 class UserLogin:
 
     def create(self, user):

@@ -1,14 +1,15 @@
 import os
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask import Flask, render_template, request, flash, redirect, url_for
-from webapp.weather import weather_city
-from webapp.python_org_news import get_python_news
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from webapp.model import db, User, News, GPU
-from webapp.queries import get_user_by_email, get_user_by_id
+
+from flask import Flask, flash, redirect, render_template, request, url_for
+from flask_login import (LoginManager, current_user, login_required,
+                         login_user, logout_user)
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from webapp.forms import LoginForm
+from webapp.model import GPU, News, User, db
+from webapp.python_org_news import get_python_news
+from webapp.queries import get_user_by_email, get_user_by_id
+from webapp.weather import weather_city
 
 
 def create_app():
@@ -21,13 +22,10 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = 'login'
 
-
     @login_manager.user_loader
     def load_user(user_id):
         print('load user')
         return User.query.get(user_id)
-
-
 
     menu = {
         'Home': '/',
@@ -75,18 +73,17 @@ def create_app():
             # TODO добавить проверку на корректность введенных данных
 
             try:
-                hash = generate_password_hash(request.form['psw'])
-                u = User(email=request.form['email'], psw=hash)
+                password_hash = generate_password_hash(request.form['password'])
+                user = User(email=request.form['email'],
+                            password=password_hash,
+                            firstname=request.form['firstname'],
+                            lastname=request.form['lastname'],
+                            city=request.form['city'],
+                            role='user')
 
-                db.session.add(u)
-                db.session.flush()  # пока в памяти
-
-                p = Profiles(firstname=request.form['firstname'], lastname=request.form['lastname'],
-                             city=request.form['city'], user_id=u.id)
-                db.session.add(p)
-                db.session.commit()  # а вот тут уже пишем в базу
-
-                print('user added to the base')
+                db.session.add(user)
+                db.session.commit()
+                print(f'User {user.firstname} {user.lastname} registered successfully')
                 flash('User registered successfully', 'success')
                 return redirect(url_for('index'))
 

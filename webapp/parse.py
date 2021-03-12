@@ -1,13 +1,13 @@
+import json
 import sys
 import time
-from random import randint
-import pandas as pd
-from bs4 import BeautifulSoup
-import requests
 from datetime import datetime
-import json
 from pprint import pprint
+from random import randint
 
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 data = pd.DataFrame()
 
