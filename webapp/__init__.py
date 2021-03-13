@@ -1,11 +1,12 @@
 import os
+from pprint import pprint
 
 from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_login import (LoginManager, current_user, login_required,
                          login_user, logout_user)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from webapp.forms import LoginForm
+from webapp.forms import LoginForm, RegistrationForm
 from webapp.model import GPU, News, User, db
 from webapp.python_org_news import get_python_news
 from webapp.queries import get_user_by_email, get_user_by_id
@@ -16,6 +17,7 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = os.urandom(24)
     app.config.from_pyfile("settings.py")
+
     db.init_app(app)
 
     login_manager = LoginManager(app)
@@ -30,8 +32,8 @@ def create_app():
     menu = {
         'Home': '/',
         'GPU': '/gpu',
-        # 'News': '/news',
-        # 'Weather': '/weather',
+        'News': '/news',
+        'Weather': '/weather',
         'Register': '/register',
         'Login': '/login',
         'Profile': '/profile',
@@ -66,35 +68,42 @@ def create_app():
         news_list = News.query.order_by(News.published.desc()).all()
         return render_template('news.html', page_title=title, news_list=news_list, menu=menu)
 
-    @app.route('/register', methods=('POST', 'GET'))
+    @app.route('/register')
     def register():
-        if request.method == 'POST':
+        if current_user.is_authenticated:
+            flash('You are already in da club, bro!', 'success')
+            return redirect(url_for('profile'))
 
-            # TODO добавить проверку на корректность введенных данных
+        title = 'Sign In'
+        reg_form = RegistrationForm()
+        return render_template('register.html', title=title, menu=menu, reg_form=reg_form)
 
-            try:
-                password_hash = generate_password_hash(request.form['password'])
-                user = User(email=request.form['email'],
-                            password=password_hash,
-                            firstname=request.form['firstname'],
-                            lastname=request.form['lastname'],
-                            city=request.form['city'],
-                            role='user')
-
-                db.session.add(user)
-                db.session.commit()
-                print(f'User {user.firstname} {user.lastname} registered successfully')
-                flash('User registered successfully', 'success')
-                return redirect(url_for('index'))
-
-            except Exception as exp:
-                db.session.rollback()  # откатываем изменения
-                print(f"Ошибка добавления в БД: {exp}")
-                flash('something goes wrong!', 'error')
-        return render_template('register.html', title='Registration', menu=menu)
+    @app.route('/process-sign-in', methods=['POST'])
+    def process_sign_in():
+        form = RegistrationForm()
+        try:
+            email = form.email.data
+            password = generate_password_hash(form.password.data)
+            firstname = form.firstname.data
+            lastname = form.lastname.data
+            city = form.city.data
+            user = User(email=email, password=password, firstname=firstname, lastname=lastname, city=city,
+                        role='user')
+            # print(user)
+            db.session.add(user)
+            db.session.commit()
+            login_user(user)
+            flash('user registered successfully', 'success')
+            return redirect('profile')
+        except Exception as exp:
+            print(f'Ошибка записи в БД: {exp}: {exp.args}')
+            db.session.rollback()
+            flash('Ошибка регистрации!', 'error')
+            return redirect('register')
 
     @app.route('/login')
     def login():
+        print(f'url for login: {url_for("login")}')
         if current_user.is_authenticated:
             flash('You are logged in', 'success')
             return redirect(url_for('index'))
