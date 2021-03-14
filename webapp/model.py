@@ -34,6 +34,10 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+    @property
+    def is_admin(self):
+        return (self.role == 'admin' or self.role == 'root')
+
     def __str__(self):
         return f'<users {self.id, self.email, self.firstname, self.lastname, self.password}>'
 

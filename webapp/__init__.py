@@ -117,7 +117,7 @@ def create_app():
         if login_form.validate_on_submit():
             user = User.query.filter_by(email=login_form.email.data).first()
             if user and user.check_password(login_form.password.data):
-                login_user(user)
+                login_user(user, remember=login_form.remember_me.data)
                 flash('You are logged in', 'success')
                 return redirect(url_for('gpu'))
         flash('Неправильное имя пользователя или пароль', 'warning')
@@ -141,5 +141,13 @@ def create_app():
     def gpu():
         gpus = GPU.query.all()
         return render_template('gpu.html', menu=menu, title='Видеокарты', gpus=gpus)
+
+    @app.route('/admin')
+    @login_required
+    def admin_index():
+        if current_user.is_admin:
+            return 'Привет админ'
+        else:
+            return 'Ты не админ!'
 
     return app
