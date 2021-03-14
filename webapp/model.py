@@ -34,37 +34,6 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
-    @property
-    def is_admin(self):
-        return self.role == 'admin' or self.role == 'root'
-
-    @staticmethod
-    def get_user_by_id(user_id):
-        try:
-            user = User.query.filter(User.id == user_id).first()
-            if not user:
-                print('user not found!')
-                return None
-            return user
-        except Exception as exp:
-            print(f'Get data from Database error: {exp}')
-        return None
-
-    @staticmethod
-    def get_user_by_email(email):
-        print(f'email: {email}')
-        try:
-            user = User.query.filter(User.email == email).first()
-            if not user:
-                print(f'user with email: {email} not found!')
-                return None
-            return user
-
-        except Exception as exp:
-            print(f'Get data from Database error: {exp}')
-        return None
-
-
     def __str__(self):
         return f'<users {self.id, self.email, self.firstname, self.lastname, self.password}>'
 
