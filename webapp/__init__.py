@@ -9,7 +9,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from webapp.forms import LoginForm, RegistrationForm
 from webapp.model import GPU, News, User, db
 from webapp.python_org_news import get_python_news
-from webapp.queries import get_user_by_email, get_user_by_id
 from webapp.weather import weather_city
 
 
@@ -89,7 +88,6 @@ def create_app():
             city = form.city.data
             user = User(email=email, password=password, firstname=firstname, lastname=lastname, city=city,
                         role='user')
-            # print(user)
             db.session.add(user)
             db.session.commit()
             login_user(user)
