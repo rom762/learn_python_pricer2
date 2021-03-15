@@ -5,7 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 from flask import current_app
 
-from webapp.model import News, db
+from webapp.news.models import News
+from webapp import db
 
 
 def get_html(url, save=True):
@@ -41,12 +42,6 @@ def get_python_news(local=True):
             except ValueError:
                 published = datetime.now()
             save_news(title, url, published)
-        #     result_news.append({
-        #         'title':title,
-        #         'url': url,
-        #         'published': published,
-        #     })
-        # return result_news
     return False
 
 

@@ -1,4 +1,4 @@
-from webapp.model import User
+from webapp.user.models import User
 
 
 def get_user_by_id(user_id):

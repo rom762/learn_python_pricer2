@@ -18,7 +18,5 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()], render_kw={"class": "form-control"})
     submit = SubmitField('Sign In', render_kw={"class": "btn btn-primary"})
 
-
-
     def __str__(self):
         return str(self.email.value) + str(self.firstname.value)

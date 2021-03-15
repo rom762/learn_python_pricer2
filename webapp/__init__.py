@@ -6,23 +6,28 @@ from flask_login import (LoginManager, current_user, login_required,
                          login_user, logout_user)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from webapp.forms import LoginForm, RegistrationForm
-from webapp.model import GPU, News, User, db
+from webapp.user.forms import LoginForm, RegistrationForm
+from webapp.model import GPU, db
+from webapp.user.models import User
 from webapp.python_org_news import get_python_news
 from webapp.queries import get_user_by_email, get_user_by_id
 from webapp.weather import weather_city
+from webapp.user.views import blueprint as user_blueprint
+from webapp.news.views import blueprint as news_blueprint
+from webapp.admin.admin import admin
 
 
 def create_app():
     app = Flask(__name__)
     app.secret_key = os.urandom(24)
     app.config.from_pyfile("settings.py")
-
     db.init_app(app)
-
     login_manager = LoginManager(app)
     login_manager.init_app(app)
     login_manager.login_view = 'login'
+    app.register_blueprint(user_blueprint, url_prefix='/user')
+    app.register_blueprint(news_blueprint, url_prefix='/news')
+    app.register_blueprint(admin, url_prefix='/admin')
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -45,7 +50,7 @@ def create_app():
         title = 'Pricer'
         users = User.query.all()
         if users:
-            print(len(users))
+            print(f'user counter: {len(users)}')
         else:
             print('we lost users')
         return render_template('index.html', page_title=title, users=users, menu=menu)
@@ -61,12 +66,6 @@ def create_app():
         return render_template('weather.html', page_title=title, current_city=current_city,
                                current_weather=current_weather,
                                months=months, menu=menu)
-
-    @app.route('/news')
-    def news():
-        title = 'Python News'
-        news_list = News.query.order_by(News.published.desc()).all()
-        return render_template('news.html', page_title=title, news_list=news_list, menu=menu)
 
     @app.route('/register')
     def register():
@@ -101,35 +100,6 @@ def create_app():
             flash('Ошибка регистрации!', 'error')
             return redirect('register')
 
-    @app.route('/login')
-    def login():
-        print(f'url for login: {url_for("login")}')
-        if current_user.is_authenticated:
-            flash('You are logged in', 'success')
-            return redirect(url_for('index'))
-        title = 'Login'
-        login_form = LoginForm()
-        return render_template('login.html', title=title, menu=menu, form=login_form)
-
-    @app.route('/process-login', methods=['POST'])
-    def process_login():
-        login_form = LoginForm()
-        if login_form.validate_on_submit():
-            user = User.query.filter_by(email=login_form.email.data).first()
-            if user and user.check_password(login_form.password.data):
-                login_user(user, remember=login_form.remember_me.data)
-                flash('You are logged in', 'success')
-                return redirect(url_for('gpu'))
-        flash('Неправильное имя пользователя или пароль', 'warning')
-        return redirect(url_for('login'))
-
-    @app.route('/logout')
-    @login_required
-    def logout():
-        flash('You are logged out.', 'primary')
-        logout_user()
-        return redirect(url_for('login'))
-
     @app.route('/profile')
     @login_required
     def profile():
@@ -142,12 +112,5 @@ def create_app():
         gpus = GPU.query.all()
         return render_template('gpu.html', menu=menu, title='Видеокарты', gpus=gpus)
 
-    @app.route('/admin')
-    @login_required
-    def admin_index():
-        if current_user.is_admin:
-            return 'Привет админ'
-        else:
-            return 'Ты не админ!'
 
     return app
