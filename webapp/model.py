@@ -5,8 +5,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 db = SQLAlchemy()
 
-
-
 class GPU(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     citilink_id = db.Column(db.Integer, nullable=False)

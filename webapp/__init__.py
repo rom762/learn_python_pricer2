@@ -17,6 +17,7 @@ from webapp.news.views import blueprint as news_blueprint
 from webapp.admin.admin import admin
 
 
+
 def create_app():
     app = Flask(__name__)
     app.secret_key = os.urandom(24)
