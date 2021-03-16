@@ -6,15 +6,12 @@ from flask_login import (LoginManager, current_user, login_required,
                          login_user, logout_user)
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from webapp.user.forms import LoginForm, RegistrationForm
-from webapp.model import GPU, db
-from webapp.user.models import User
+from webapp.forms import LoginForm, RegistrationForm
+from webapp.models import db, User, News, GPU
+
 from webapp.python_org_news import get_python_news
 from webapp.queries import get_user_by_email, get_user_by_id
 from webapp.weather import weather_city
-from webapp.user.views import blueprint as user_blueprint
-from webapp.news.views import blueprint as news_blueprint
-from webapp.admin.admin import admin
 
 
 def create_app():
@@ -54,6 +51,12 @@ def create_app():
         else:
             print('we lost users')
         return render_template('index.html', page_title=title, users=users, menu=menu)
+
+    @app.route('/news')
+    def news():
+        title = 'Python News'
+        news_list = News.query.order_by(News.published.desc()).all()
+        return render_template('news.html', page_title=title, news_list=news_list)
 
     @app.route('/weather')
     def weather(city='Barcelona, Spain'):
