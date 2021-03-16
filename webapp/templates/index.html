@@ -20,9 +20,9 @@
                     {% for user in users %}
                     <tr>
                         <th scope="row">{{ user['id'] }}</th>
-                        <td>{{ user.pr['firstname'].capitalize()}}</td>
-                        <td>{{ user.pr['lastname'].capitalize()}}</td>
-                        <td>{{ user.pr['city'].capitalize() }}</td>
+                        <td>{{ user['firstname'].capitalize()}}</td>
+                        <td>{{ user['lastname'].capitalize()}}</td>
+                        <td>{{ user['city'].capitalize() }}</td>
                         <td>{{ user['email'] }}</td>
                     </tr>
                     {% endfor %}

@@ -1,11 +1,17 @@
 import os
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask import Flask, render_template, request, flash, redirect, url_for
-from webapp.weather import weather_city
+from pprint import pprint
+
+from flask import Flask, flash, redirect, render_template, request, url_for
+from flask_login import (LoginManager, current_user, login_required,
+                         login_user, logout_user)
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from webapp.forms import LoginForm, RegistrationForm
+from webapp.models import db, User, News, GPU
+
 from webapp.python_org_news import get_python_news
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
-from webapp.model import db, Users, Profiles, News, GPU
+from webapp.queries import get_user_by_email, get_user_by_id
+from webapp.weather import weather_city
 
 
 def create_app():
@@ -13,83 +19,101 @@ def create_app():
     app.secret_key = os.urandom(24)
     app.config.from_pyfile("settings.py")
     db.init_app(app)
+    login_manager = LoginManager(app)
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'
+    app.register_blueprint(user_blueprint)
+    app.register_blueprint(news_blueprint)
+    app.register_blueprint(admin)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        print('load user')
+        return User.query.get(user_id)
 
     menu = {
         'Home': '/',
+        'GPU': '/gpu',
         'News': '/news',
         'Weather': '/weather',
         'Register': '/register',
-        'GPU': '/gpu',
-        # 'Авторизация': '/login',
+        'Login': '/login',
+        'Profile': '/profile',
     }
 
     @app.route('/')
     @app.route('/index')
     def index():
         title = 'Pricer'
-        users = Users.query.all()
+        users = User.query.all()
         if users:
-            print(len(users))
+            print(f'user counter: {len(users)}')
         else:
             print('we lost users')
         return render_template('index.html', page_title=title, users=users, menu=menu)
-
-    @app.route('/weather')
-    def weather(city='Barcelona, Spain'):
-        title = f'Weather in {city}'
-        weather = weather_city(city_name=city)
-        current_city = weather['data']['request'][0]['query']
-        current_weather = weather['data']['current_condition'][0]
-        months = weather['data']['ClimateAverages'][0]['month']
-        # pprint(weather)
-        return render_template('weather.html', page_title=title, current_city=current_city,
-                               current_weather=current_weather,
-                               months=months, menu=menu)
 
     @app.route('/news')
     def news():
         title = 'Python News'
         news_list = News.query.order_by(News.published.desc()).all()
-        return render_template('news.html', page_title=title, news_list=news_list, menu=menu)
+        return render_template('news.html', page_title=title, news_list=news_list)
 
-    @app.route('/register', methods=('POST', 'GET'))
+    @app.route('/weather')
+    def weather(city='Barcelona, Spain'):
+        title = f'Weather in {city}'
+        weather = weather_city(city_name=city)['data']
+        current_city = weather['request'][0]['query']
+        current_weather = weather['current_condition'][0]
+        months = weather['ClimateAverages'][0]['month']
+
+        return render_template('weather.html', page_title=title, current_city=current_city,
+                               current_weather=current_weather,
+                               months=months, menu=menu)
+
+    @app.route('/register')
     def register():
-        if request.method == 'POST':
+        if current_user.is_authenticated:
+            flash('You are already in da club, bro!', 'success')
+            return redirect(url_for('profile'))
 
-            # TODO добавить проверку на корректность введенных данных
+        title = 'Sign In'
+        reg_form = RegistrationForm()
+        return render_template('register.html', title=title, menu=menu, reg_form=reg_form)
 
-            try:
-                hash = generate_password_hash(request.form['psw'])
-                u = Users(email=request.form['email'], psw=hash)
-                db.session.add(u)
-                db.session.flush()  # пока в памяти
+    @app.route('/process-sign-in', methods=['POST'])
+    def process_sign_in():
+        form = RegistrationForm()
+        try:
+            email = form.email.data
+            password = generate_password_hash(form.password.data)
+            firstname = form.firstname.data
+            lastname = form.lastname.data
+            city = form.city.data
+            user = User(email=email, password=password, firstname=firstname, lastname=lastname, city=city,
+                        role='user')
+            # print(user)
+            db.session.add(user)
+            db.session.commit()
+            login_user(user)
+            flash('user registered successfully', 'success')
+            return redirect('profile')
+        except Exception as exp:
+            print(f'Ошибка записи в БД: {exp}: {exp.args}')
+            db.session.rollback()
+            flash('Ошибка регистрации!', 'error')
+            return redirect('register')
 
-                p = Profiles(firstname=request.form['firstname'], lastname=request.form['lastname'],
-                             city=request.form['city'], user_id=u.id)
-                db.session.add(p)
-                db.session.commit()  # а вот тут уже пишем в базу
-
-                print('user added to the base')
-                flash('User registered successfully', 'success')
-                return redirect(url_for('index'))
-
-            except Exception as exp:
-                db.session.rollback()  # откатываем изменения
-                print(f"Ошибка добавления в БД: {exp}")
-                flash('something goes wrong!', 'error')
-        return render_template('register.html', title='Registration', menu=menu)
-
-    @app.route('/login')
-    def login():
-        return render_template('login.html', menu=menu, title='Авторизация')
+    @app.route('/profile')
+    @login_required
+    def profile():
+        user = User.query.filter(User.id == current_user.get_id()).first()
+        return render_template('profile.html', menu=menu, title='Profile', user=user)
 
     @app.route('/gpu')
+    @login_required
     def gpu():
         gpus = GPU.query.all()
         return render_template('gpu.html', menu=menu, title='Видеокарты', gpus=gpus)
 
+
     return app
-#
-# if __name__ == "__main__":
-#     app.secret_key = os.urandom(24)
-#     app.run(debug=True)
