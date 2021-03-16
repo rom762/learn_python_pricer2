@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from flask import current_app
 
 from webapp.news.models import News
-from webapp import db
+from webapp.model import db
 
 
 def get_html(url, save=True):

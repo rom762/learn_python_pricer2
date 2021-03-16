@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from webapp import db
+from webapp.model import db
 
 
 class User(db.Model, UserMixin):
@@ -23,7 +23,7 @@ class User(db.Model, UserMixin):
 
     @property
     def is_admin(self):
-        return (self.role == 'admin' or self.role == 'root')
+        return self.role == 'admin' or self.role == 'root'
 
     def __str__(self):
         return f'<users {self.id, self.email, self.firstname, self.lastname, self.password}>'
