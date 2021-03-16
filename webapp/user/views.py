@@ -1,5 +1,5 @@
 from flask import Blueprint
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import current_app, Flask, flash, redirect, render_template, request, url_for
 from flask_login import (LoginManager, current_user, login_required,
                          login_user, logout_user)
 from webapp.user.forms import LoginForm, RegistrationForm
@@ -8,26 +8,15 @@ from webapp.user.models import User
 blueprint = Blueprint('user', __name__, url_prefix='/users')
 
 
-menu = {
-        'Home': '/',
-        'GPU': '/gpu',
-        'News': '/news',
-        'Weather': '/weather',
-        'Register': '/register',
-        'Login': '/login',
-        'Profile': '/profile',
-    }
-
-
 @blueprint.route('/login')
 def login():
-    print(f'url for login: {url_for("login")}')
+    print(f'url for login: {url_for("user.login")}')
     if current_user.is_authenticated:
         flash('You are logged in', 'success')
         return redirect(url_for('index'))
     title = 'Login'
     login_form = LoginForm()
-    return render_template('login.html', title=title, menu=menu, form=login_form)
+    return render_template('login.html', title=title, menu=current_app.menu, form=login_form)
 
 
 @blueprint.route('/process-login', methods=['POST'])

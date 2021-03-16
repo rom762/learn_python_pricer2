@@ -23,7 +23,7 @@ def create_app():
     db.init_app(app)
     login_manager = LoginManager(app)
     login_manager.init_app(app)
-    login_manager.login_view = 'login'
+    login_manager.login_view = 'user.login'
     app.register_blueprint(user_blueprint)
     app.register_blueprint(news_blueprint)
     app.register_blueprint(admin)
@@ -33,13 +33,13 @@ def create_app():
         print('load user')
         return User.query.get(user_id)
 
-    menu = {
+    app.menu = {
         'Home': '/',
         'GPU': '/gpu',
         'News': '/news',
         'Weather': '/weather',
         'Register': '/register',
-        'Login': '/login',
+        'Login': '/users/login',
         'Profile': '/profile',
     }
 
@@ -52,7 +52,7 @@ def create_app():
             print(f'user counter: {len(users)}')
         else:
             print('we lost users')
-        return render_template('index.html', page_title=title, users=users, menu=menu)
+        return render_template('index.html', page_title=title, users=users, menu=app.menu)
 
     @app.route('/weather')
     def weather(city='Barcelona, Spain'):
@@ -64,7 +64,7 @@ def create_app():
 
         return render_template('weather.html', page_title=title, current_city=current_city,
                                current_weather=current_weather,
-                               months=months, menu=menu)
+                               months=months, menu=app.menu)
 
     @app.route('/register')
     def register():
@@ -74,7 +74,7 @@ def create_app():
 
         title = 'Sign In'
         reg_form = RegistrationForm()
-        return render_template('register.html', title=title, menu=menu, reg_form=reg_form)
+        return render_template('register.html', title=title, menu=app.menu, reg_form=reg_form)
 
     @app.route('/process-sign-in', methods=['POST'])
     def process_sign_in():
@@ -103,13 +103,12 @@ def create_app():
     @login_required
     def profile():
         user = User.query.filter(User.id == current_user.get_id()).first()
-        return render_template('profile.html', menu=menu, title='Profile', user=user)
+        return render_template('profile.html', menu=app.menu, title='Profile', user=user)
 
     @app.route('/gpu')
     @login_required
     def gpu():
         gpus = GPU.query.all()
-        return render_template('gpu.html', menu=menu, title='Видеокарты', gpus=gpus)
-
+        return render_template('gpu.html', menu=app.menu, title='Видеокарты', gpus=gpus)
 
     return app
