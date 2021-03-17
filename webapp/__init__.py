@@ -1,19 +1,14 @@
 import os
-from pprint import pprint
 
-from flask import Flask, flash, redirect, render_template, request, url_for
-from flask_login import (LoginManager, current_user, login_required,
-                         login_user, logout_user)
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask import Flask, render_template
+from flask_login import LoginManager, current_user, login_required
 
-from webapp.user.forms import LoginForm, RegistrationForm
-from webapp.model import GPU, db
-from webapp.user.models import User
-from webapp.python_org_news import get_python_news
-from webapp.weather import weather_city
-from webapp.user.views import blueprint as user_blueprint
-from webapp.news.views import blueprint as news_blueprint
 from webapp.admin.admin import admin
+from webapp.model import GPU, db
+from webapp.news.views import blueprint as news_blueprint
+from webapp.user.models import User
+from webapp.user.views import blueprint as user_blueprint
+from webapp.weather import weather_city
 
 
 def create_app():
@@ -30,7 +25,7 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        print('load user')
+        print(f'load user {user_id}')
         return User.query.get(user_id)
 
     app.menu = {
@@ -38,9 +33,9 @@ def create_app():
         'GPU': '/gpu',
         'News': '/news',
         'Weather': '/weather',
-        'Register': '/register',
-        'Login': '/users/login',
-        'Profile': '/profile',
+        'Register': '/user/register',
+        'Login': '/user/login',
+        'Profile': '/user/profile',
     }
 
     @app.route('/')
@@ -51,8 +46,9 @@ def create_app():
         if users:
             print(f'user counter: {len(users)}')
         else:
-            print('we lost users')
-        return render_template('index.html', page_title=title, users=users, menu=app.menu)
+            print('we lost user')
+        return render_template('index.html', page_title=title,
+                               users=users, menu=app.menu)
 
     @app.route('/weather')
     def weather(city='Barcelona, Spain'):
@@ -62,53 +58,16 @@ def create_app():
         current_weather = weather['current_condition'][0]
         months = weather['ClimateAverages'][0]['month']
 
-        return render_template('weather.html', page_title=title, current_city=current_city,
-                               current_weather=current_weather,
-                               months=months, menu=app.menu)
-
-    @app.route('/register')
-    def register():
-        if current_user.is_authenticated:
-            flash('You are already in da club, bro!', 'success')
-            return redirect(url_for('profile'))
-
-        title = 'Sign In'
-        reg_form = RegistrationForm()
-        return render_template('register.html', title=title, menu=app.menu, reg_form=reg_form)
-
-    @app.route('/process-sign-in', methods=['POST'])
-    def process_sign_in():
-        form = RegistrationForm()
-        try:
-            email = form.email.data
-            password = generate_password_hash(form.password.data)
-            firstname = form.firstname.data
-            lastname = form.lastname.data
-            city = form.city.data
-            user = User(email=email, password=password, firstname=firstname, lastname=lastname, city=city,
-                        role='user')
-            # print(user)
-            db.session.add(user)
-            db.session.commit()
-            login_user(user)
-            flash('user registered successfully', 'success')
-            return redirect('profile')
-        except Exception as exp:
-            print(f'Ошибка записи в БД: {exp}: {exp.args}')
-            db.session.rollback()
-            flash('Ошибка регистрации!', 'error')
-            return redirect('register')
-
-    @app.route('/profile')
-    @login_required
-    def profile():
-        user = User.query.filter(User.id == current_user.get_id()).first()
-        return render_template('profile.html', menu=app.menu, title='Profile', user=user)
+        return render_template(
+            'weather.html', page_title=title,
+            current_city=current_city, current_weather=current_weather,
+            months=months, menu=app.menu)
 
     @app.route('/gpu')
     @login_required
     def gpu():
         gpus = GPU.query.all()
-        return render_template('gpu.html', menu=app.menu, title='Видеокарты', gpus=gpus)
+        return render_template(
+            'gpu.html', menu=app.menu, title='Видеокарты', gpus=gpus)
 
     return app

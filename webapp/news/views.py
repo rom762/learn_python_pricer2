@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template
+
 from webapp.news.models import News
 
 blueprint = Blueprint('news', __name__, url_prefix='/news')
