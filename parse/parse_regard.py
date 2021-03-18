@@ -1,3 +1,4 @@
+import os
 import re
 from datetime import datetime
 from urllib.parse import urlparse
@@ -37,14 +38,15 @@ def get_products_on_page(soup):
         current_product = {}
 
         img = block.select('div.block_img')[0].select('a')[0]['href']
+        regard_id = int(block.find('div', class_='code').text.split()[-1])
         content = block.select('div.aheader')[0].find('span')
-
         name = content.attrs['content']
         brand = content.attrs['data-brand']
 
         price_span = block.select('div.price')[0].findAll('span')[-1]
         price = float(''.join(re.findall(r'\d', price_span.text)))
 
+        current_product['regard_id'] = regard_id
         current_product['brand'] = brand
         current_product['name'] = name
         current_product['img'] = img
@@ -77,7 +79,9 @@ def main():
         data = pd.concat([data, df], ignore_index=True, sort=False)
     date_str = datetime.strftime(datetime.today(), '%Y-%m-%d %H-%M')
     filename = "regard_" + date_str + ".csv"
-    data.to_csv(filename, encoding='UTF-8', index=False)
+    full_path = os.path.join(os.path.dirname(__file__), 'data', filename)
+    normalized_path = os.path.abspath(full_path)
+    data.to_csv(normalized_path, encoding='UTF-8', index=False, sep=';')
 
 
 if __name__ == "__main__":

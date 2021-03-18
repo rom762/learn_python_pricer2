@@ -1,10 +1,12 @@
+import os
 import csv
 import time
 from datetime import datetime
 from pprint import pprint
 
 from webapp import create_app
-from webapp.model import GPU, User, db
+from webapp.model import GPU, db
+from webapp.user.models import User
 
 
 def read_users(filename='profiles.csv'):
@@ -60,13 +62,27 @@ def save_gpu_data(row):
         print(f"Ошибка добавления в БД: {exp}, {exp.args}")
 
 
+def get_fields(filename='regard_2021-03-18 17-17.csv'):
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    file_fullpath = os.path.join(basedir, 'webapp', 'parse', filename)
+    with open(file_fullpath, 'r') as ff:
+        line = ff.readline().strip()
+        print(line)
+        fields = line.split(';')
+    return fields
+
+
 if __name__ == '__main__':
+    # app = create_app()
+    # with app.app_context():
+    #     start = time.perf_counter()
+    #     users = read_users()
+    #     pprint(users)
+    #     db.session.bulk_insert_mappings(User, users)
+    #     db.session.commit()
+    #     end = time.perf_counter() - start
+    #     print(f'Загрузка заняла: {end} секунд')
     app = create_app()
     with app.app_context():
-        start = time.perf_counter()
-        users = read_users()
-        pprint(users)
-        db.session.bulk_insert_mappings(User, users)
-        db.session.commit()
-        end = time.perf_counter() - start
-        print(f'Загрузка заняла: {end} секунд')
+        fields = get_fields()
+        print(fields)
