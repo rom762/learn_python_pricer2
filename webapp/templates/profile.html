@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+{{ super() }}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#ID</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
+                        <th scope="col">City</th>
+                        <th scope="col">E-mail</th>
+                        <th scopre="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">{{ user.id }}</th>
+                        <td>{{ user.firstname.capitalize()}}</td>
+                        <td>{{ user.lastname.capitalize()}}</td>
+                        <td>{{ user.city.capitalize() }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <a class="btn btn-primary" href="{{ url_for('logout') }}" role="button">Logout</a>
+                        </td>
+                    </tr>
+
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

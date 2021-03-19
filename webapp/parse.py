@@ -1,13 +1,13 @@
+import json
 import sys
 import time
+from datetime import datetime
+from pprint import pprint
+from random import randint
 
 import pandas as pd
-from bs4 import BeautifulSoup
 import requests
-from datetime import datetime
-import json
-from pprint import pprint
-
+from bs4 import BeautifulSoup
 
 data = pd.DataFrame()
 
@@ -33,42 +33,17 @@ file_names = {
     'toners' : 'toners',
     'gpu': 'gpu',
 }
+
 # тут задаем категорию из которой парсим
 CATEGORY = 'gpu'
-BASE_URL = urls[CATEGORY]
+base_url = urls[CATEGORY]
 now = datetime.now()
 filename = [str(now.year), str(now.month), str(now.day), file_names[CATEGORY]]
 final_filename = '-'.join(filename) + '.csv'
-print(BASE_URL, final_filename)
+print(base_url, final_filename)
 
 
-# def get_soup(url):
-#     r = requests.get(url, headers={'User-Agent': UserAgent().chrome})
-#     if r.status_code != 200:
-#         print(f'Attention! Status is {r.status_code}')
-#         return 'stop'
-#     else:
-#         soup = BeautifulSoup(r.text, 'html.parser')
-#         return soup.body
-
-
-def save_page(url='https://www.citilink.ru/catalog/videokarty/?p='):
-    key = 1
-    url = url + str(key)
-    response = requests.get(url)
-    if response.status_code == 200:
-        html = response.text
-        with open('../citilink.html', 'w') as ff:
-            ff.write(html)
-            print('done!')
-
-# save_page()
-def get_local_citilink():
-    with open('../citilink.html', 'r', encoding='cp1251') as ff:
-        return BeautifulSoup(ff.read(), 'html.parser')
-
-
-def get_response(url=BASE_URL, key=1):
+def get_response(url=base_url, key=1):
     current_url = url + str(key)
     try:
         response = requests.get(url)
@@ -77,52 +52,50 @@ def get_response(url=BASE_URL, key=1):
             return response.text
         else:
             print(response.status_code)
-            return False
+            return None
     except ValueError as exp:
         print(exp)
-        return False
+        return None
 
 
-def parse_html(html):
+def get_products_data(html):
     soup = BeautifulSoup(html, 'html.parser')
     products_on_page = soup.select('div.product_data__gtm-js')
-    dicts_list = []
+    products_data = []
 
-    for i in range(len(products_on_page)):
-        product_params = json.loads(products_on_page[i]['data-params'])
+    for product in products_on_page:
+        current_product_params = json.loads(product['data-params'])
         try:
-            product_picture = products_on_page[i].select('img.ProductCardHorizontal__image')[0]['src'] or \
-                              products_on_page[i].select('img.ProductCardVertical__picture')[0]['src']
+            current_product_picture = product.select('img.ProductCardHorizontal__image')[0]['src'] or \
+                              product.select('img.ProductCardVertical__picture')[0]['src']
         except IndexError as exp:
-            print(i, exp, exp.args)
+            print(f'product has {current_product_params["id"]} has no picture')
 
-        product_params['picture'] = product_picture
-        # if i % 10 == 0:
-        #     print(product_params)
-        dicts_list.append(product_params)
+        current_product_params['picture'] = current_product_picture
+        products_data.append(current_product_params)
 
-    return dicts_list
+    return products_data
 
 
-current_page_number = 1
+def parse_data(page=1):
+    final_df = pd.DataFrame()
+    while page < 2:
+        print(f'current_page_number: {page}')
+        html = get_response(key=page)
+        if not html:
+            break
+        result = get_products_data(html)
 
-while current_page_number < 10:
-    print(f'current_page_number: {current_page_number}')
-    html = get_response(key=current_page_number)
-    if html:
-        result = parse_html(html)
-        df = pd.DataFrame(result)
-        data = pd.concat([data, df], ignore_index=True, sort=False)
-        print(data['id'].count)
-        filename = f'citilink_{current_page_number}.csv'
-        data.to_csv(filename, sep=';', encoding='utf-8', index=False)
-    else:
-        break
+        portion_df = pd.DataFrame(result)
+        final_df = pd.concat([final_df, portion_df], ignore_index=True, sort=False)
+        page += 1
+        # citilink начинает возвращать 404 если парсить слишком быстро
+        print('now sleeping...')
+        time.sleep(randint(1, 4))
 
-    current_page_number += 1
-    time.sleep(4)
-    # вот тут круто было бы пока спим писать в файл бэкап но это асинхрон, я туда не умею :(
-
-data.to_csv('citilink.csv', sep=';', encoding='utf-8', index=False)
+    final_df.to_csv(final_filename, sep=';', encoding='utf-8', index=False)
+    print('Done!')
 
 
+if __name__ == "__main__":
+    parse_data(page=1)

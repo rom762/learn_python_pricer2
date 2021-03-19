@@ -1,9 +1,11 @@
-import requests
 from datetime import datetime
-from bs4 import BeautifulSoup
 from pathlib import Path
+
+import requests
+from bs4 import BeautifulSoup
 from flask import current_app
-from webapp.model import db, News
+
+from webapp.model import News, db
 
 
 def get_html(url, save=True):

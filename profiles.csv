@@ -1,0 +1,12 @@
+id;firstname;lastname;city;email;psw;date;role
+1;Roman;Tarkov;Moscow;roman_tarkov@mail.ru;pbkdf2:sha256:150000$Pf09PnDJ$0603fb24588c520ecdfc7738b16ca880640eb12a44c24c8bc4f68ad963322fda;2021-03-05 15:50:49.665318;admin
+2;John;Wick;New-York;john@gmail.com;pbkdf2:sha256:150000$tnbA72zI$5b04716318b6f7d44974e28a11a681c705fcec5df402b9289c5f1f59fc75d758;2021-03-05 16:00:19.244610;user
+3;Michael;Jordan;Chicago;air_jordan@nike.com;pbkdf2:sha256:150000$j0FGKsH1$7e44af228e4c0c157ef4abb1f08ba69ed9d73875b1d919755e17a5d797ae2258;2021-03-05 16:45:38.757497;user
+4;Jack;Reacher;Barcelona;jack@yahoo.com;pbkdf2:sha256:150000$BlZYuG40$91e3223106bb4e77abddb5226e0794444998306cd3c8a7e3e126ce934a1731f1;2021-03-07 18:38:13.777167;user
+5;Konstantin;Tumanov;Moscow;kosta@mail.ru;pbkdf2:sha256:150000$934xU0M3$f94232ca3822870c24da53f172ca9fb6dd3e38b143c9ea307dbe69123a098a4f;2021-03-07 18:40:19.147750;user
+6;Sergey;Gazaryan;Erevan;serg@yahoo.com;pbkdf2:sha256:150000$afbKehxq$aa9306ba239f3cc2f2462fde137a0d6217189e3437f3b6d88a10f9a90fd8417e;2021-03-07 18:48:06.867457;user
+7;Sergey;Kolosnitsin;Moscow;kolos@mail.ru;pbkdf2:sha256:150000$Pn2LTtPQ$68d88905844d53cb43ad930537c51dafbd879148707ab101e5c6bac318c41cce;2021-03-07 18:51:42.742610;user
+8;Pavel;Grigoriev;Valencia;pasha@mail.ru;pbkdf2:sha256:150000$OZzNgiGa$a3b309665f4dcd88354a870e13cbb257c1bd6a0c5ab520e9e514fb2b26c20f21;2021-03-07 21:25:35.994377;user
+9;Andrey;Levin;Paris;andy@gmail.com;pbkdf2:sha256:150000$OMJpYL2R$3351e97ad2f9af9be2ca06305980a18f35b04a867ec74f8afb99696fcf015df2;2021-03-07 21:26:55.491531;user
+10;Gosha;Nikulin;Moscow;gosha@ya.ru;pbkdf2:sha256:150000$MzoLp29r$40147c4e3541ac3829ae2fda337d2b8a206337245fd5eacff547c8cbb03997eb;2021-03-07 21:27:36.274525;moderator
+11;Роман;Никулин;Москва;nickro@ya.ru;pbkdf2:sha256:150000$vKrSsWrF$f1464cfdebeaccc554210d520b6f155d5dc4a594bf0e17ea30f1f8f175f0b0c0;2021-03-11 19:45:53.742799;root

@@ -1,41 +1,32 @@
 {% extends 'base.html' %}
 {% block content %}
 {{ super() }}
-
 <div class="container">
     <div class="row">
-        <div class="col">
-            <h3>{{ title }}</h3>
-            {% for cat, msg in get_flashed_messages(True) %}
-            <div class="flash {{cat}}">{{msg}}</div>
-            {% endfor %}
-        </div>
-    </div>
-    <div class="row">
         <div class="col-4">
-            <form action="" method="POST" class="form-contact">
-            <div class="form-group">
-                <label for="firstname">Firstname:</label><br>
-                <input type="text" name="firstname" value="" requied>
-            </div>
-            <div class="form-group">
-                <label for="lastname">Lastname:</label><br>
-                <input type="text" name="lastname" value="" requied>
-            </div>
-            <div class="form-group">
-                <label for="city">City:</label><br>
-                <input type="text" name="city" value="" requied>
-            </div>
-            <div class="form-group">
-                <label for="email">Email address:</label>
-                <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-                <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
-            </div>
-            <div class="form-group">
-                    <label for="psw">Password</label>
-                    <input type="password" name="psw" class="form-control" id="exampleInputPassword1" placeholder="Password">
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <form action="{{ url_for('process_sign_in') }}" method="post">
+                {{ reg_form.hidden_tag() }}
+                <div class="form-group">
+                    {{ reg_form.email.label }}<br>
+                    {{ reg_form.email() }}
+                </div>
+                <div class="form-group">
+                    {{ reg_form.password.label }}<br>
+                    {{ reg_form.password() }}
+                </div>
+                <div class="form-group">
+                    {{ reg_form.firstname.label }}<br>
+                    {{ reg_form.firstname() }}
+                </div>
+                <div class="form-group">
+                    {{ reg_form.lastname.label }}<br>
+                    {{ reg_form.lastname() }}
+                </div>
+                <div class="form-group">
+                    {{ reg_form.city.label }}<br>
+                    {{ reg_form.city() }}
+                </div>
+                {{ reg_form.submit }}
             </form>
         </div>
     </div>
