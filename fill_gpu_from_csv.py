@@ -9,7 +9,7 @@ from webapp.model import GPU, db
 from webapp.user.models import User
 
 
-def read_users(filename='profiles.csv'):
+def read_users(filename='users.csv'):
     with open(filename, 'r', encoding='ansi') as ff:
         fields = ['id', 'firstname', 'lastname', 'city', 'email', 'password', 'date', 'role']
         reader = csv.DictReader(ff, fields, delimiter=';', )
@@ -73,16 +73,16 @@ def get_fields(filename='regard_2021-03-18 17-17.csv'):
 
 
 if __name__ == '__main__':
-    # app = create_app()
-    # with app.app_context():
-    #     start = time.perf_counter()
-    #     users = read_users()
-    #     pprint(users)
-    #     db.session.bulk_insert_mappings(User, users)
-    #     db.session.commit()
-    #     end = time.perf_counter() - start
-    #     print(f'Загрузка заняла: {end} секунд')
     app = create_app()
     with app.app_context():
-        fields = get_fields()
-        print(fields)
+        start = time.perf_counter()
+        users = read_users()
+        pprint(users)
+        db.session.bulk_insert_mappings(User, users)
+        db.session.commit()
+        end = time.perf_counter() - start
+        print(f'Загрузка заняла: {end} секунд')
+    # app = create_app()
+    # with app.app_context():
+    #     fields = get_fields()
+    #     print(fields)

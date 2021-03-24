@@ -52,7 +52,7 @@ def process_login():
         if user and user.check_password(login_form.password.data):
             login_user(user, remember=login_form.remember_me.data)
             flash('You are logged in', 'success')
-            return redirect(url_for('gpu'))
+            return redirect(url_for('gpu.gpu'))
     flash('Неправильное имя пользователя или пароль', 'warning')
     return redirect(url_for('user.login'))
 
