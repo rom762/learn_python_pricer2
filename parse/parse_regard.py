@@ -47,9 +47,9 @@ def get_products_on_page(soup):
         price = float(''.join(re.findall(r'\d', price_span.text)))
 
         current_product['regard_id'] = regard_id
-        current_product['brand'] = brand
+        current_product['brand_name'] = brand
         current_product['name'] = name
-        current_product['img'] = img
+        current_product['picture'] = img
         current_product['price'] = price
 
         products.append(current_product)
