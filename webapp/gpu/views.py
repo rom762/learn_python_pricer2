@@ -19,7 +19,8 @@ def gpu():
 @login_required
 def gpu_detail(gpu_id):
     gpu = GPU.query.filter_by(id=gpu_id).first()
+    citilink
     if not gpu:
         abort(404)
     else:
-        return render_template('/detail.html', title=gpu.name, gpu=gpu)
+        return render_template('/detail.html', menu=current_app.menu, title=gpu.name, gpu=gpu)

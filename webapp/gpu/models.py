@@ -12,6 +12,7 @@ class GPU(db.Model):
 
 
 class Citilink(db.Model):
+    __tablename__ = 'citilink'
     id = db.Column(db.Integer, primary_key=True)
     citilink_id = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, nullable=False)
@@ -22,9 +23,10 @@ class Citilink(db.Model):
     brand_name = db.Column(db.String, nullable=False)
     club_price = db.Column(db.String, nullable=True)
     picture = db.Column(db.String, nullable=False)
+    url = db.Column(db.String)
 
     def __repr__(self):
-        return f'<GPU: id:{self.id}\n, ' \
+        return f'<citilink_gpu: id:{self.id}\n, ' \
                f'shortname: {self.shortName}\n, ' \
                f'price: {self.price}>'
 
@@ -36,6 +38,7 @@ class Regard(db.Model):
     name = db.Column(db.String)
     picture = db.Column(db.String)
     price = db.Column(db.Numeric)
+    url = db.Column(db.String)
 
     def __repr__(self):
         return f'<regard: id:{self.id}\n, name: {self.name}\n, brand: {self.brand}\n, name: {self.name}>'
@@ -50,18 +53,18 @@ class GpuPrice(db.Model):
     created_on = db.Column(db.Date(), default=datetime.utcnow())
 
 
-class GpuLink(db.Model):
-    __tablename__ = 'gpu_links'
-    id = db.Column(db.Integer, primary_key=True)
-    shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
-    link = db.Column(db.String)
-    gpu_id = db.Column(db.Integer, db.ForeignKey('GPU.id'))
-
-
-class GpuInShops(db.Model):
-    __tablename__ = 'gpu_in_shops'
-    id = db.Column(db.Integer, primary_key=True)
-    gpu_id = db.Column(db.Integer, db.ForeignKey('GPU.id'))
-    shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
-    link = db.Column(db.String)
-    created_on = db.Column(db.Date(), default=datetime.utcnow())
+# class GpuLink(db.Model):
+#     __tablename__ = 'gpu_links'
+#     id = db.Column(db.Integer, primary_key=True)
+#     shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
+#     link = db.Column(db.String)
+#     gpu_id = db.Column(db.Integer, db.ForeignKey('GPU.id'))
+#
+#
+# class GpuInShops(db.Model):
+#     __tablename__ = 'gpu_in_shops'
+#     id = db.Column(db.Integer, primary_key=True)
+#     gpu_id = db.Column(db.Integer, db.ForeignKey('GPU.id'))
+#     shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
+#     link = db.Column(db.String)
+#     created_on = db.Column(db.Date(), default=datetime.utcnow())

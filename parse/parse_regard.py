@@ -47,10 +47,11 @@ def get_products_on_page(soup):
         price = float(''.join(re.findall(r'\d', price_span.text)))
 
         current_product['regard_id'] = regard_id
-        current_product['brand_name'] = brand
+        current_product['brand'] = brand
         current_product['name'] = name
         current_product['picture'] = img
         current_product['price'] = price
+        current_product['url'] = 'https://www.regard.ru/catalog/tovar' + str(regard_id) + '.htm'
 
         products.append(current_product)
 
@@ -63,9 +64,9 @@ def main():
     splitted_url_parts = urlparse(BASE_URL)
 
     fetch_response_for_pagination = get_response(BASE_URL)
-    pages_to_pagse = get_links_to_parse(fetch_response_for_pagination)
+    pages_to_parse = get_links_to_parse(fetch_response_for_pagination)
 
-    for page in pages_to_pagse:
+    for page in pages_to_parse:
         url = splitted_url_parts.scheme + '://' + splitted_url_parts.netloc + page
         print(url)
         response = get_response(url)

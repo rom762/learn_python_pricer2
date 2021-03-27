@@ -30,11 +30,12 @@ class Parse:
 
 class Regard(Parse):
 
-    def __init__(self):
+    def __init__(self, url):
+        super().__init__(url)
         self.products = []
         self.pages = []
 
-    def get_links_to_parse(self):
+    def get_pages_to_parse(self):
         html = self.get_html()
         soup = BeautifulSoup(html, 'html.parser')
         pagination = soup.select('div.pagination')[0].findAll('a')
@@ -43,30 +44,40 @@ class Regard(Parse):
             if page.has_attr('href'):
                 self.pages.append(page['href'])
 
-    def get_products_on_page(self):
-        soup = self.get_html(self.url)
+    def get_products_on_page(self, soup):
 
         products_on_page = soup.findAll('div', class_='block')
+
         for index, block in enumerate(products_on_page):
             current_product = {}
+
             img = block.select('div.block_img')[0].select('a')[0]['href']
             regard_id = int(block.find('div', class_='code').text.split()[-1])
             content = block.select('div.aheader')[0].find('span')
             name = content.attrs['content']
             brand = content.attrs['data-brand']
+
             price_span = block.select('div.price')[0].findAll('span')[-1]
             price = float(''.join(re.findall(r'\d', price_span.text)))
 
             current_product['regard_id'] = regard_id
-            current_product['brand'] = brand
+            current_product['brand_name'] = brand
             current_product['name'] = name
-            current_product['img'] = img
+            current_product['picture'] = img
             current_product['price'] = price
+            current_product['url'] = 'https://www.regard.ru/catalog/tovar' + str(regard_id) + '.htm'
+            current_product['model'] = self.get_regard_model(name)
 
             self.products.append(current_product)
 
-
-
+    @staticmethod
+    def get_regard_model(name):
+        pattern = "\(([^)]*)"
+        match = re.search(pattern, name)
+        if match:
+            return match[1]
+        else:
+            return None
 
     def __str__(self):
         return f'{self.__class__}, {self.url}'

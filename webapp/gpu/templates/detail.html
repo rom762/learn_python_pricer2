@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
 {{ super() }}
+
 <div class="container">
     <div class="row">
         <div class="col">
             <div class="card" style="width: 18rem;">
-                <img src="{{ gpu.picture }}" class="card-img-top" alt="{{ gpu.name }}">
+                <img src="https://items.s1.citilink.ru/352141_v01_m.jpg" class="card-img-top" alt="{{ gpu.name }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ gpu.model}}</h5>
                     <p class="card-text">{{ gpu.name }}</p>

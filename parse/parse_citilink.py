@@ -1,3 +1,4 @@
+import os
 import logging
 import json
 import sys
@@ -10,7 +11,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-data = pd.DataFrame()
+#data = pd.DataFrame()
 
 logging.basicConfig(filename='parse.log', level=logging.DEBUG)
 
@@ -30,25 +31,23 @@ urls = {
 }
 
 file_names = {
-    'monitors' : 'monitors',
+    'monitors': 'monitors',
     'cartridges': 'cartridges',
-    'cactus' : 'cactus',
-    'toners' : 'toners',
+    'cactus': 'cactus',
+    'toners': 'toners',
     'gpu': 'gpu',
 }
 
 # тут задаем категорию из которой парсим
 CATEGORY = 'gpu'
 base_url = urls[CATEGORY]
-now = datetime.now()
-filename = [str(now.year), str(now.month), str(now.day), file_names[CATEGORY]]
-final_filename = '-'.join(filename) + '.csv'
+filename = datetime.strftime(datetime.utcnow(), '%Y-%m-%d-%H-%M-%S')
+final_filename = 'citilink_' + filename + '.csv'
 
-print(base_url, 'data', final_filename)
+print(base_url, 'data', final_filename, sep='\n')
 
 
-def get_response(url=base_url, key=1, params=None):
-    current_url = url + str(key)
+def get_response(url=base_url, params=None):
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
@@ -74,17 +73,25 @@ def next_page(html):
 
 def parse_data(html):
     soup = BeautifulSoup(html, 'html.parser')
-    products_on_page = soup.select('div.product_data__gtm-js')
+    section = soup.select('section.ProductGroupList')[0]
+    products_on_page = section.select('div.product_data__gtm-js')
     products_data = []
 
     for product in products_on_page:
         current_product = json.loads(product['data-params'])
+
         try:
-            picture = product.select('img.ProductCardHorizontal__image')[0]['src'] or \
-                              product.select('img.ProductCardVertical__picture')[0]['src']
+            picture = product.select('img.ProductCardHorizontal__image')[0]['src']
             current_product['picture'] = picture
         except IndexError as exp:
-            logging.info(f'product with {current_product["id"]} has no picture')
+            print(f'product with {current_product["id"]} has no picture')
+
+        try:
+            product_header = product.select('div.ProductCardHorizontal__header-block')[0]
+            product_url = product_header.select('a.ProductCardHorizontal__title')[0]['href']
+            current_product['url'] = 'https://www.citilink.ru' + product_url
+        except IndexError as exp:
+            print(f'product with {current_product["id"]} has no detailed page')
 
         products_data.append(current_product)
 
@@ -107,20 +114,26 @@ def collect_data(page=1):
         print('now sleeping...')
         time.sleep(randint(1, 4))
 
-    final_df.to_csv(final_filename, sep=';', encoding='utf-8', index=False)
+    final_df.rename({
+        'id': 'citilink_id',
+        'categoryId': 'category_id',
+        'price': 'price',
+        'oldPrice': 'old_price',
+        'shortName': 'short_name',
+        'categoryName': 'category_name',
+        'brandName': 'brand_name',
+        'clubPrice': 'club_price',
+        'picture': 'picture',
+        'url': 'url'
+    }, axis=1, inplace=True)
+    final_path = os.path.join('data', final_filename)
+    final_df.to_csv(final_path, sep=';', encoding='utf-8', index=False)
     logging.info('parsing citilink is done.')
+    print('parsing citilink is done.')
 
 
 if __name__ == "__main__":
     collect_data()
 
-
-    # next_page = 1
-    # while next_page:
-    #     response = get_response(params={'p': next_page})
-    #     print(f'status: {response.status_code}')
-    #     html = get_html(response)
-    #     next_page = next_page(html)
-    #     print(f'next_page: {next_page}')
 
 
