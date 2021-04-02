@@ -1,11 +1,10 @@
+from pprint import pprint
+
 from webapp import create_app
 
 from webapp.model import db
 from webapp.user.models import User
-from webapp.gpu.models import GPU
-
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
+from webapp.gpu.models import GPU, GpuPrice
 
 
 def get_user_by_id(user_id):
@@ -36,33 +35,81 @@ def get_user_by_email(email):
     return None
 
 
-def find_equals_gpu(gpu, list_to_find):
-    pass
+def first_var():
+    gpus = GPU.query.all()
+    final = []
+    for gpu in gpus:
+        prices = GpuPrice.query.filter(GpuPrice.gpu_id == gpu.id).order_by(GpuPrice.created_on).all()
+        prices_cleared = []
+        if prices:
+            for price in prices:
+                prices_cleared.append({'shop_id': price.shop_id,
+                                       'price': float(price.price),
+                                       })
+        elem = {'gpu_id': gpu.id,
+                'name': gpu.name,
+                'vendor': gpu.vendor,
+                'price': prices_cleared,
+                }
+        final.append(elem)
+    return final
 
 
-def get_gpu():
-    return GPU.query.all()
+def second_var():
+    query = db.session.query(GpuPrice, GPU).join(
+        GPU, GpuPrice.gpu_id == GPU.id
+    )
+    gpu_list = []
 
+    for prices, gpu in query:
+        prices_cleared = []
+        # print(f'gpu - {gpu.id, gpu.model}')
+        if prices:
+            # print(prices.price)
+            elem = {'gpu_id': gpu.id,
+                    'name': gpu.name,
+                    'vendor': gpu.vendor,
+                    'price': prices,
+                    }
+        gpu_list.append(elem)
+
+    return gpu_list
+
+
+def third_var():
+    query = db.session.query(GPU)
+    price_list = []
+    for vc in query:
+        prices = []
+        for price in vc.prices:
+            prices.append({
+                'shop_id': price.shop_id,
+                'price': price.price,
+            })
+
+        elem = {
+            'gpu_id': vc.id,
+            'name': vc.name,
+            'vendor': vc.vendor,
+            'prices': prices,
+            'url': vc.links,
+        }
+        price_list.append(elem)
+    return price_list
 
 
 if __name__ == '__main__':
-    # from webapp import create_app
-    # app = create_app()
-    # with app.app_context():
-    #     user = get_user_by_email('jack@yahoo.com')
-    #     print(user.psw)
-
-    # a = fuzz.ratio('Привет мир', 'Привет мир')
-    # print(a)
-    # get_gpu()
 
     app = create_app()
     with app.app_context():
-        gpus = get_gpu()
-        for gpu in gpus:
-            print(gpu.id, gpu.model)
+        # print(third_var(1))
+        gpus = third_var()
 
-
-
-
-
+        for each in gpus:
+            if each['gpu_id'] == 1:
+                print(f"gpu_id: {each['gpu_id']}")
+                print(f"name: {each['name']}")
+                print(f"vendor: {each['vendor']}")
+                print(f"links: {each['url']}")
+                for price in each['prices']:
+                    print(f"shop {price['shop_id']} - {float(price['price'])}")

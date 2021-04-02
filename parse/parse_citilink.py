@@ -11,8 +11,6 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-#data = pd.DataFrame()
-
 logging.basicConfig(filename='parse.log', level=logging.DEBUG)
 
 parameters = {
@@ -39,15 +37,16 @@ file_names = {
 }
 
 # тут задаем категорию из которой парсим
-CATEGORY = 'gpu'
-base_url = urls[CATEGORY]
-filename = datetime.strftime(datetime.utcnow(), '%Y-%m-%d-%H-%M-%S')
-final_filename = 'citilink_' + filename + '.csv'
-
-print(base_url, 'data', final_filename, sep='\n')
+BASE_URL = "https://www.citilink.ru/catalog/videokarty/"
 
 
-def get_response(url=base_url, params=None):
+def make_final_filename():
+    filename = datetime.strftime(datetime.now(), '%Y-%m-%d-%H-%M-%S')
+    final_filename = 'citilink_' + filename + '.csv'
+    return final_filename
+
+
+def get_response(url=BASE_URL, params=None):
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
@@ -72,14 +71,19 @@ def next_page(html):
 
 
 def parse_data(html):
+
+    products_data = []
+
     soup = BeautifulSoup(html, 'html.parser')
     section = soup.select('section.ProductGroupList')[0]
     products_on_page = section.select('div.product_data__gtm-js')
-    products_data = []
 
     for product in products_on_page:
         current_product = json.loads(product['data-params'])
-
+        for already_parsed in products_data:
+            if current_product['id'] == already_parsed['id']:
+                print(f'find duplicate {current_product["id"]}')
+                continue
         try:
             picture = product.select('img.ProductCardHorizontal__image')[0]['src']
             current_product['picture'] = picture
@@ -108,25 +112,30 @@ def collect_data(page=1):
         result = parse_data(html)
 
         portion_df = pd.DataFrame(result)
+
         final_df = pd.concat([final_df, portion_df], ignore_index=True, sort=False)
+
         page = next_page(html)
         # citilink начинает возвращать 404 если парсить слишком быстро
         print('now sleeping...')
         time.sleep(randint(1, 4))
 
     final_df.rename({
-        'id': 'citilink_id',
+        'id': 'shop_gpu_id',
         'categoryId': 'category_id',
         'price': 'price',
         'oldPrice': 'old_price',
-        'shortName': 'short_name',
+        'shortName': 'name',
         'categoryName': 'category_name',
-        'brandName': 'brand_name',
+        'brandName': 'vendor',
         'clubPrice': 'club_price',
         'picture': 'picture',
-        'url': 'url'
+        'url': 'url',
     }, axis=1, inplace=True)
-    final_path = os.path.join('data', final_filename)
+
+    final_path = os.path.join('data', make_final_filename())
+
+    final_df['model'] = final_df['name'].apply(lambda x: x.split(', ')[-1].strip())
     final_df.to_csv(final_path, sep=';', encoding='utf-8', index=False)
     logging.info('parsing citilink is done.')
     print('parsing citilink is done.')
