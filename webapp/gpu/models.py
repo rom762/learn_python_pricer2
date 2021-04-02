@@ -11,8 +11,16 @@ class GPU(db.Model):
     name = db.Column(db.String, nullable=False)
     picture = db.Column(db.String, nullable=True)
     model = db.Column(db.String, nullable=False, unique=True)
-    prices = relationship("GpuPrice", backref="parent")
-    links = relationship("GpuLink", backref="what_is_that")
+
+    def __repr__(self):
+        elem = {
+            'id': self.id,
+            'vendor': self.vendor,
+            'name': self.name,
+            'picture': self.picture,
+            'model': self.model,
+        }
+        return elem
 
 
 class Citilink(db.Model):
@@ -56,8 +64,8 @@ class GpuPrice(db.Model):
     gpu_id = db.Column(db.Integer, db.ForeignKey('GPU.id'), index=True, nullable=False)
     price = db.Column(db.Numeric, nullable=False)
     shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'), index=True, nullable=False)
-    created_on = db.Column(db.Date(), default=datetime.utcnow(), nullable=False)
-    gpu = relationship("GPU", backref="child")
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow(), nullable=False)
+
 
 
 class GpuLink(db.Model):

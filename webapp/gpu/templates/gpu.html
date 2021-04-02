@@ -15,7 +15,7 @@
                         <th scope="col">#ID</th>
                         <th scope="col">Name</th>
                         <th scope="col">Vendor</th>
-<!--                        <th scope="col">Details</th>-->
+                        <th scope="col">Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,10 +25,15 @@
                         <td><a href="{{ url_for('gpu.gpu_detail', gpu_id=video_card['gpu_id']) }}">{{ video_card['name'] }}</a></td>
                         <td>{{ video_card['vendor'] }}</td>
 <!--                        <td>-->
-<!--                            {% for price in video_card['prices'] %}-->
+<!--                            {% for price in prices %}-->
 <!--                                Shop {{ price["shop_id"] }} - {{ price.price }}<br>-->
 <!--                            {% endfor %}-->
 <!--                        </td>-->
+                        <td>
+                            <a href="{{ url_for('gpu.gpu_detail', gpu_id=video_card['gpu_id']) }}">
+                                <button class="btn btn-primary">Details</button>
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
 

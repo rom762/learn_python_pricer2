@@ -1,3 +1,4 @@
+import numpy as np
 import logging
 from functools import reduce
 import os
@@ -13,6 +14,8 @@ from webapp.gpu.models import Regard, Citilink, GPU, GpuPrice, GpuLink
 from pprint import pprint
 from datetime import datetime
 
+
+pd.set_option('display.max_columns', None)
 models = {'citilink': Citilink, 'regard': Regard}
 
 
@@ -162,16 +165,12 @@ def find_shop_by_name(search_str):
 
 
 def get_new_products_from_file(filename):
-    # вот тут как то можно наверное по другому.
-    # нужно просто выбрать столбец model оттуда и кинуть в список
-    # надо спросить в чате
-    # gpus = pd.read_sql('SELECT GPU.model FROM GPU', con=db.session.bind)
-    # gpus_model_list = gpus['model'].to_list()
-
     gpus = db.session.query(GPU.model).all()
-    gpus_model_list = reduce(lambda x, y: list(x) + list(y), gpus)
+    if gpus:
+        gpus_model_list = reduce(lambda x, y: list(x) + list(y), gpus)
+    else:
+        gpus_model_list = []
     gpus2db = []
-    gpu2url = []
     with open(filename, 'r', encoding='UTF-8') as ff:
         fields = ff.readline().strip().split(';')
         reader = csv.DictReader(ff, fields, delimiter=';')
@@ -182,22 +181,29 @@ def get_new_products_from_file(filename):
                 # gpu = GPU(vendor=row['vendor'], name=row['name'], picture=row['picture'], model=model)
                 # db.session.add(gpu)
                 gpu = {'vendor': row['vendor'], 'name': row['name'], 'picture': row['picture'], 'model': model}
-
                 gpus2db.append(gpu)
                 gpus_model_list.append(model)
-            #     print(f'gpu {model} added')
+                # print(f'gpu {model} added')
             # else:
             #     print(f'{model} already in da base')
+    if len(gpus2db):
         db.session.bulk_insert_mappings(GPU, gpus2db, return_defaults=True)
         db.session.commit()
-        return gpus2db
+        logging.info(f'added {len(gpus2db)} video cards in DB.GPU from {filename}')
+        print(f'added {len(gpus2db)} video cards in DB.GPU')
+    else:
+        print(f'nothing to add to the DB')
+    return gpus2db
 
 
-def get_new_prices(filename, shop_id):
+def get_new_prices_v2(filename, shop_id):
     parsed_df = pd.read_csv(filename, encoding='UTF-8', sep=';')
     parsed_df['shop_id'] = shop_id
     parsed_df = parsed_df.loc[:, ['price', 'model', 'shop_id']]
+    parsed_df = parsed_df.loc[parsed_df['model'] != 'delete']
+    parsed_df = parsed_df.drop_duplicates(subset='model', keep='first')
 
+    parsed_gpu_model_list = parsed_df['model'].unique()
     gpu_in_db_df = pd.read_sql_table('GPU', con=db.session.bind)
     gpu_in_db_df = gpu_in_db_df.loc[:, ['id', 'model']]
 
@@ -206,44 +212,92 @@ def get_new_prices(filename, shop_id):
     final.rename(columns={'id': 'gpu_id'}, inplace=True)
     final.drop(columns=['model'], inplace=True)
     final['created_on'] = datetime.now()
+    # final.to_csv(r'data/final.csv', encoding='ansi', sep=';', index=False)
+
     try:
         final.to_sql('gpu_prices', if_exists='append', index=False, con=db.session.bind)
         print(f'{final["gpu_id"].count()} was added to prices')
+        return final
     except Exception as exp:
         final.to_csv(r'data/final.csv', encoding='ansi', sep=';', index=False)
         print(exp, exp.args)
 
 
-def get_urls(filename):
+def get_new_prices(filename, shop_id):
     parsed_df = pd.read_csv(filename, encoding='UTF-8', sep=';')
     parsed_df['shop_id'] = shop_id
-    # parsed_df = parsed_df.loc[:, ['url', 'price', 'model', 'shop_id']]
+    parsed_df = parsed_df.loc[:, ['price', 'model', 'shop_id']]
+    parsed_df = parsed_df.loc[parsed_df['model'] != 'delete']
+    parsed_df = parsed_df.drop_duplicates(subset='model', keep='first')
+
+    parsed_gpu_model_list = parsed_df['model'].unique()
+    gpu_in_db_df = pd.read_sql_table('GPU', con=db.session.bind)
+    gpu_in_db_df = gpu_in_db_df.loc[:, ['id', 'model']]
+
+    final = parsed_df.merge(gpu_in_db_df)
+
+    final.rename(columns={'id': 'gpu_id'}, inplace=True)
+    final.drop(columns=['model'], inplace=True)
+    final['created_on'] = datetime.now()
+    final.to_csv(r'data/final.csv', encoding='ansi', sep=';', index=False)
+
+    # try:
+    #     final.to_sql('gpu_prices', if_exists='append', index=False, con=db.session.bind)
+    #     print(f'{final["gpu_id"].count()} was added to prices')
+    #     return final
+    # except Exception as exp:
+    #     final.to_csv(r'data/final.csv', encoding='ansi', sep=';', index=False)
+    #     print(exp, exp.args)
+
+
+def get_urls(filename, shop_id):
+    parsed_df = pd.read_csv(filename, encoding='UTF-8', sep=';')
+    parsed_df['shop_id'] = shop_id
+    # parsed_df = parsed_df.loc[:, ['price', 'model', 'shop_id', ]]
+    parsed_df = parsed_df.loc[parsed_df['model'] != 'delete']
+    parsed_df = parsed_df.drop_duplicates(subset='model', keep='first')
 
     gpu_in_db_df = pd.read_sql_table('GPU', con=db.session.bind)
     gpu_in_db_df = gpu_in_db_df.loc[:, ['id', 'model']]
 
     final = parsed_df.merge(gpu_in_db_df)
-    final = final.loc[:, ['id', 'shop_id', 'shop_gpu_id', 'url']]
+
+    final = final.loc[:, ['id', 'shop_id', 'shop_gpu_id', 'url', 'price']]
     final.rename(columns={'id': 'gpu_id'}, inplace=True)
 
+    already_in_links = db.session.query(GpuLink.gpu_id).all()
+    already_in_links = reduce(lambda x, y: list(x) + list(y), already_in_links)
+
+    final = final.loc[~final['gpu_id'].isin(already_in_links)]
+
     records = final.to_dict('records')
+
     write_to_db(GpuLink, records)
     return records
 
 
-if __name__ == '__main__':
+def main():
     app = create_app()
     with app.app_context():
+        shops = Shop.query.all()
+        for shop in shops:
+            shop_name = shop.name
+            shop_id = shop.id
+            print(f'Shop name: {shop_name}')
 
-        filename = get_latest_file(shop='regard')
-        print(f'filename: {filename}')
-        shop_id = find_shop_by_name(filename)
-        if shop_id:
+            filename = get_latest_file(shop=shop_name)
+            print(f'filename: {filename}')
+
             new_gpu = get_new_products_from_file(filename)
-            print(f'added {len(new_gpu)} gpus')
-            get_new_prices(filename, shop_id)
-            records = get_urls(filename)
-            print(f'{len(records)} added to links')
-        else:
-            print('Shop not found!')
+            if new_gpu:
+                print(f'added {len(new_gpu)} gpus')
 
+            new_prices = get_new_prices_v2(filename, shop_id)
+            print(f'{len(new_prices)} new prices added to the DB.')
+
+            records = get_urls(filename, shop_id)
+            print(f'{len(records)} added to links')
+
+
+if __name__ == '__main__':
+    main()

@@ -11,9 +11,9 @@
                     <h5 class="card-title">{{ gpu.model}}</h5>
                     <p class="card-text">{{ gpu.name }}</p>
                     <ul>
-                    {% for price in gpu['prices'] %}
+                    {% for price in prices %}
                         <li>
-                            <a href="#">link to {{ price["shop_id"] }}</a>: <span class="price">{{ price.price }} руб.</span>
+                            <a href="{{ price['link'] }}" target="_blank">link to {{ price["shop_id"] }}</a>: <span class="price">{{ price.price }} руб.</span>
                         </li>
                     {% endfor %}
                     </ul>
