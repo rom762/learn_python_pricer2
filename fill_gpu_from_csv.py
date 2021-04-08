@@ -65,14 +65,6 @@ def save_gpu_data(row):
 
 if __name__ == '__main__':
     app = create_app()
-    # with app.app_context():
-    #     start = time.perf_counter()
-    #     users = read_users()
-    #     pprint(users)
-    #     db.session.bulk_insert_mappings(User, users)
-    #     db.session.commit()
-    #     end = time.perf_counter() - start
-    #     print(f'Загрузка заняла: {end} секунд')
     with app.app_context():
         fields = get_fields()
         print(fields)

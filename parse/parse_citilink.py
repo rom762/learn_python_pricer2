@@ -70,6 +70,32 @@ def next_page(html):
         return int(link_to_last_page[0]['data-page'])
 
 
+def is_already_parsed(products_data, current_product_id):
+    for already_parsed in products_data:
+        if already_parsed['id'] == current_product_id:
+            print(f'find duplicate {current_product_id}')
+            return True
+    return False
+
+
+def get_picture(product):
+    try:
+        picture = product.select('img.ProductCardHorizontal__image')[0]['src']
+        return picture
+    except IndexError as exp:
+        return None
+
+
+def get_url(product):
+    try:
+        product_header = product.select('div.ProductCardHorizontal__header-block')[0]
+        product_url = product_header.select('a.ProductCardHorizontal__title')[0]['href']
+        current_product_url = 'https://www.citilink.ru' + product_url
+        return current_product_url
+    except IndexError as exp:
+        return None
+
+
 def parse_data(html):
 
     products_data = []
@@ -80,23 +106,11 @@ def parse_data(html):
 
     for product in products_on_page:
         current_product = json.loads(product['data-params'])
-        for already_parsed in products_data:
-            if current_product['id'] == already_parsed['id']:
-                print(f'find duplicate {current_product["id"]}')
-                continue
-        try:
-            picture = product.select('img.ProductCardHorizontal__image')[0]['src']
-            current_product['picture'] = picture
-        except IndexError as exp:
-            print(f'product with {current_product["id"]} has no picture')
+        if is_already_parsed(products_data, current_product['id']):
+            continue
 
-        try:
-            product_header = product.select('div.ProductCardHorizontal__header-block')[0]
-            product_url = product_header.select('a.ProductCardHorizontal__title')[0]['href']
-            current_product['url'] = 'https://www.citilink.ru' + product_url
-        except IndexError as exp:
-            print(f'product with {current_product["id"]} has no detailed page')
-
+        current_product['picture'] = get_picture(product)
+        current_product['url'] = get_url(product)
         products_data.append(current_product)
 
     return products_data

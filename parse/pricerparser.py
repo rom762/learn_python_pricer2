@@ -3,7 +3,7 @@ import re
 from bs4 import BeautifulSoup
 
 
-class Parse:
+class PricerParser:
 
     def __init__(self, *args, **kwargs):
         self.url = kwargs['url']
@@ -16,7 +16,7 @@ class Parse:
                 self.status = response.status_code
                 return response.text
 
-        except Exception as exp:
+        except requests.exceptions.RequestException as exp:
             print(response.raise_for_status())
             print(exp, exp.args)
         return None
@@ -28,7 +28,7 @@ class Parse:
         return f'url: {self.url}, status: {self.status}'
 
 
-class Regard(Parse):
+class Regard(PricerParser):
 
     def __init__(self, url):
         super().__init__(url)
@@ -44,30 +44,34 @@ class Regard(Parse):
             if page.has_attr('href'):
                 self.pages.append(page['href'])
 
+    def parse_product(self, block):
+        current_product = {}
+
+        img = block.select('div.block_img')[0].select('a')[0]['href']
+        regard_id = int(block.find('div', class_='code').text.split()[-1])
+        content = block.select('div.aheader')[0].find('span')
+        name = content.attrs['content']
+        brand = content.attrs['data-brand']
+
+        price_span = block.select('div.price')[0].findAll('span')[-1]
+        price = float(''.join(re.findall(r'\d', price_span.text)))
+
+        current_product['regard_id'] = regard_id
+        current_product['brand_name'] = brand
+        current_product['name'] = name
+        current_product['picture'] = img
+        current_product['price'] = price
+        current_product['url'] = 'https://www.regard.ru/catalog/tovar' + str(
+            regard_id) + '.htm'
+        current_product['model'] = self.get_regard_model(name)
+        return current_product
+
     def get_products_on_page(self, soup):
 
-        products_on_page = soup.findAll('div', class_='block')
+        products_on_page = soup.find_all('div', class_='block')
 
         for index, block in enumerate(products_on_page):
-            current_product = {}
-
-            img = block.select('div.block_img')[0].select('a')[0]['href']
-            regard_id = int(block.find('div', class_='code').text.split()[-1])
-            content = block.select('div.aheader')[0].find('span')
-            name = content.attrs['content']
-            brand = content.attrs['data-brand']
-
-            price_span = block.select('div.price')[0].findAll('span')[-1]
-            price = float(''.join(re.findall(r'\d', price_span.text)))
-
-            current_product['regard_id'] = regard_id
-            current_product['brand_name'] = brand
-            current_product['name'] = name
-            current_product['picture'] = img
-            current_product['price'] = price
-            current_product['url'] = 'https://www.regard.ru/catalog/tovar' + str(regard_id) + '.htm'
-            current_product['model'] = self.get_regard_model(name)
-
+            current_product = self.parse_product(block)
             self.products.append(current_product)
 
     @staticmethod
@@ -83,7 +87,7 @@ class Regard(Parse):
         return f'{self.__class__}, {self.url}'
 
 
-class Citilink(Parse):
+class Citilink(PricerParser):
 
     def __str__(self):
         return f'{self.__class__}, {self.url}'
