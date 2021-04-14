@@ -79,16 +79,12 @@ def write_to_db(model, data, need_returns=False):
 
 def merge_data_from_shops_csv():
 
-    # regard_file = "regard_2021-03-27 20-21.csv"
     regard_file = get_latest_file('regard')
-    # citilink_file = "citilink 2021-3-27-gpu.csv"
     citilink_file = get_latest_file('citilink')
 
     citilink_df = pd.read_csv(citilink_file, encoding="UTF-8", sep=';')
-    # citilink_df['model'] = citilink_df['short_name'].apply(lambda x: x.split(', ')[-1].strip())
 
     regard_df = pd.read_csv(regard_file, encoding="UTF-8", sep=';')
-    # regard_df['model'] = regard_df['name'].apply(lambda x: crop_regard_model_from_name(x))
     regard_df = regard_df.loc[regard_df['model'] != 'delete']
 
     gpu = pd.merge(citilink_df, regard_df, how='inner', on='model', suffixes=('_citilink', '_regard'))
@@ -124,10 +120,7 @@ def fill_shops_tables(shop='regard'):
         latest_file = get_latest_file('*' + shop + '*.csv')
         print(f'latest file: {latest_file}')
         fields = get_fields(latest_file)
-        # print(f'fields: {fields}')
         products = get_products_from_csv(latest_file, fields)
-        # print('Products========================================')
-        # pprint(products)
         app = create_app()
         with app.app_context():
             write_to_db(db_model, products)
@@ -177,16 +170,10 @@ def get_new_products_from_file(filename):
         reader = csv.DictReader(ff, fields, delimiter=';')
         for row in reader:
             model = row['model']
-            # gpu_id = has_id(model)
             if model not in gpus_model_list:
-                # gpu = GPU(vendor=row['vendor'], name=row['name'], picture=row['picture'], model=model)
-                # db.session.add(gpu)
                 gpu = {'vendor': row['vendor'], 'name': row['name'], 'picture': row['picture'], 'model': model}
                 gpus2db.append(gpu)
                 gpus_model_list.append(model)
-                # print(f'gpu {model} added')
-            # else:
-            #     print(f'{model} already in da base')
     if len(gpus2db):
         db.session.bulk_insert_mappings(GPU, gpus2db, return_defaults=True)
         db.session.commit()
@@ -213,7 +200,6 @@ def get_new_prices_v2(filename, shop_id):
     final.rename(columns={'id': 'gpu_id'}, inplace=True)
     final.drop(columns=['model'], inplace=True)
     final['created_on'] = datetime.now()
-    # final.to_csv(r'data/final.csv', encoding='ansi', sep=';', index=False)
 
     try:
         final.to_sql('gpu_prices', if_exists='append', index=False, con=db.session.bind)
@@ -242,19 +228,10 @@ def get_new_prices(filename, shop_id):
     final['created_on'] = datetime.now()
     final.to_csv(r'data/final.csv', encoding='ansi', sep=';', index=False)
 
-    # try:
-    #     final.to_sql('gpu_prices', if_exists='append', index=False, con=db.session.bind)
-    #     print(f'{final["gpu_id"].count()} was added to prices')
-    #     return final
-    # except Exception as exp:
-    #     final.to_csv(r'data/final.csv', encoding='ansi', sep=';', index=False)
-    #     print(exp, exp.args)
-
 
 def get_urls(filename, shop_id):
     parsed_df = pd.read_csv(filename, encoding='UTF-8', sep=';')
     parsed_df['shop_id'] = shop_id
-    # parsed_df = parsed_df.loc[:, ['price', 'model', 'shop_id', ]]
     parsed_df = parsed_df.loc[parsed_df['model'] != 'delete']
     parsed_df = parsed_df.drop_duplicates(subset='model', keep='first')
 
