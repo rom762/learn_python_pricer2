@@ -1,4 +1,6 @@
-from webapp.model import db
+from webapp.model import db, Shop
+from webapp.user.models import User
+
 from datetime import datetime
 from sqlalchemy.orm import relationship
 
@@ -25,6 +27,7 @@ class GPU(db.Model):
 
 class Citilink(db.Model):
     __tablename__ = 'citilink'
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     citilink_id = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, nullable=False)
@@ -45,6 +48,7 @@ class Citilink(db.Model):
 
 
 class Regard(db.Model):
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     regard_id = db.Column(db.Integer, nullable=False)
     brand = db.Column(db.String)
@@ -60,6 +64,7 @@ class Regard(db.Model):
 
 class GpuPrice(db.Model):
     __tablename__ = 'gpu_prices'
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     gpu_id = db.Column(db.Integer, db.ForeignKey('GPU.id'), index=True, nullable=False)
     price = db.Column(db.Numeric, nullable=False)
@@ -67,21 +72,23 @@ class GpuPrice(db.Model):
     created_on = db.Column(db.DateTime(), default=datetime.utcnow(), nullable=False)
 
 
-
 class GpuLink(db.Model):
     __tablename__ = 'gpu_links'
+    __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
-    gpu_id = db.Column(db.Integer, db.ForeignKey('GPU.id'))
+    shop_id = db.Column(db.Integer, db.ForeignKey('shop.id', ondelete='CASCADE'))
+    gpu_id = db.Column(db.Integer, db.ForeignKey('GPU.id', ondelete='CASCADE'))
     shop_gpu_id = db.Column(db.String, nullable=False, unique=True)
     url = db.Column(db.String)
+    shop = relationship('Shop', backref='gpu_link')
 
-#
-#
-# class GpuInShops(db.Model):
-#     __tablename__ = 'gpu_in_shops'
-#     id = db.Column(db.Integer, primary_key=True)
-#     gpu_id = db.Column(db.Integer, db.ForeignKey('GPU.id'))
-#     shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
-#     link = db.Column(db.String)
-#     created_on = db.Column(db.Date(), default=datetime.utcnow())
+
+class GpuUser(db.Model):
+    __tablename__ = 'gpu_user'
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True)
+    gpu_id = db.Column(db.Integer, db.ForeignKey('GPU.id', ondelete='CASCADE'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+    gpu = relationship("GPU", backref='gpu_users')
+    user = relationship("User", backref='user_gpus')
+

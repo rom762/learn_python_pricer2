@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash
 from webapp.model import db
 from webapp.user.forms import LoginForm, RegistrationForm
 from webapp.user.models import User
+from webapp.gpu.models import GpuUser
 
 blueprint = Blueprint('user', __name__, template_folder='templates', url_prefix='/user')
 
@@ -39,9 +40,9 @@ def login():
 def profile():
     title = 'Profile'
     user = User.query.filter(User.id == current_user.get_id()).first()
-    print(user)
+    subscribes = GpuUser.query.filter(GpuUser.user_id == user.id).order_by(GpuUser.gpu_id).all()
     return render_template('profile.html', title=title,
-                           menu=current_app.menu, user=user)
+                           menu=current_app.menu, user=user, subscribes=subscribes)
 
 
 @blueprint.route('/process-login', methods=['POST'])

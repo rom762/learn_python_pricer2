@@ -2,8 +2,8 @@
 {% block content %}
 {{ super() }}
 
-<div class="container">
-    <div class="row">
+<div class="container overflow-hidden">
+    <div class="row gy-5" >
         <div class="col">
             <div class="card" style="width: 18rem;">
                 <img src="{{ url_for('static', filename='images/352141_v01_m.jpg')}}" class="card-img-top" alt="{{ gpu.name }}">
@@ -13,10 +13,26 @@
                     <ul>
                     {% for price in prices %}
                         <li>
-                            <a href="{{ price['link'] }}" target="_blank">link to {{ price["shop_id"] }}</a>: <span class="price">{{ price.price }} руб.</span>
+                            <a href="{{ price['link'] }}" target="_blank">link to {{ price["shop_name"] }}</a>: <span class="price">{{ price.price }} руб.</span>
                         </li>
                     {% endfor %}
                     </ul>
+                    {% if not already_subscribed %}
+                        {% if can_subscribe %}
+                            <a href="{{ url_for('gpu.subscribe', gpu_id=gpu.id, next=request.full_path) }}">
+                                <button class="btn btn-primary">Subscribe</button>
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('user.profile') }}">
+                                <button class="btn btn-outline-danger">Limit exceeded</button>
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('gpu.unsubscribe', gpu_id=gpu.id, next=request.full_path) }}">
+                            <button class="btn btn-secondary btn-sm">Un-subscribe</button>
+                        </a>
+                    {% endif %}
+
                 </div>
             </div>
         </div>

@@ -9,8 +9,9 @@ from pathlib import Path
 import pandas as pd
 from glob import glob
 from webapp import create_app
+from webapp.user.models import User
 from webapp.model import db, Shop
-from webapp.gpu.models import Regard, Citilink, GPU, GpuPrice, GpuLink
+from webapp.gpu.models import Regard, Citilink, GPU, GpuPrice, GpuLink, GpuUser
 from pprint import pprint
 from datetime import datetime
 

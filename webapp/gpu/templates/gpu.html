@@ -30,9 +30,10 @@
 <!--                            {% endfor %}-->
 <!--                        </td>-->
                         <td>
-                            <a href="{{ url_for('gpu.gpu_detail', gpu_id=video_card['gpu_id']) }}">
-                                <button class="btn btn-primary">Details</button>
+                            <a href="{{ url_for('gpu.subscribe', gpu_id=video_card['gpu_id'], next=request.full_path) }}">
+                                <button class="btn btn-primary btn-sm">Subscribe</button>
                             </a>
+
                         </td>
                     </tr>
                     {% endfor %}
