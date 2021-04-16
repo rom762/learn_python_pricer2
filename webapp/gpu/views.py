@@ -1,3 +1,4 @@
+import logging
 from pprint import pprint
 from decimal import Decimal
 from webapp.user.forms import RegistrationForm
@@ -88,18 +89,18 @@ def third_var():
 @login_required
 def gpu_detail(gpu_id):
     subscribe_form = SubscribeForm()
-    gpu = GPU.query.filter_by(id=gpu_id).first()
+    video_card = GPU.query.filter_by(id=gpu_id).first()
     shops = Shop.query.all()
     prices = []
     for shop in shops:
         shop_last_price = GpuPrice.query.filter(
-            GpuPrice.gpu_id == gpu.id,
+            GpuPrice.gpu_id == video_card.id,
             GpuPrice.shop_id == shop.id).order_by(
             GpuPrice.created_on.desc())\
             .first()
 
         price_link = GpuLink.query.filter(
-            GpuLink.gpu_id == gpu.id,
+            GpuLink.gpu_id == video_card.id,
             GpuLink.shop_id == shop.id)\
             .first()
 
@@ -111,17 +112,17 @@ def gpu_detail(gpu_id):
                 'link': price_link.url,
             })
 
-    already_subscribed = GpuUser.query.filter(GpuUser.user_id == current_user.get_id(), GpuUser.gpu_id == gpu.id).all()
+    already_subscribed = GpuUser.query.filter(GpuUser.user_id == current_user.get_id(), GpuUser.gpu_id == video_card.id).all()
     print(f'detail page - already_subscribed: {already_subscribed}')
     print(f'detail page - current user id: {current_user.get_id()}')
-    print(f'detail page - gpu id: {gpu.id}')
+    print(f'detail page - gpu id: {video_card.id}')
     subscribes = GpuUser.query.filter(GpuUser.user_id == current_user.get_id()).count()
     can_subscribe = subscribes < SUBSCRIBES_LIMIT
 
-    if not gpu:
+    if not video_card:
         abort(404)
     else:
-        return render_template('/detail.html', menu=current_app.menu, title=gpu.name, gpu=gpu, prices=prices,
+        return render_template('/detail.html', menu=current_app.menu, title=video_card.name, gpu=video_card, prices=prices,
                                subscribe_form=subscribe_form,
                                already_subscribed=already_subscribed,
                                can_subscribe=can_subscribe)

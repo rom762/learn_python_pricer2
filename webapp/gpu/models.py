@@ -72,6 +72,7 @@ class GpuPrice(db.Model):
     created_on = db.Column(db.DateTime(), default=datetime.utcnow(), nullable=False)
 
 
+
 class GpuLink(db.Model):
     __tablename__ = 'gpu_links'
     __table_args__ = {'extend_existing': True}
