@@ -41,20 +41,38 @@ def get_products_on_page(soup):
         regard_id = int(block.find('div', class_='code').text.split()[-1])
         content = block.select('div.aheader')[0].find('span')
         name = content.attrs['content']
-        brand = content.attrs['data-brand']
+        vendor = content.attrs['data-brand']
 
         price_span = block.select('div.price')[0].findAll('span')[-1]
         price = float(''.join(re.findall(r'\d', price_span.text)))
 
-        current_product['regard_id'] = regard_id
-        current_product['brand'] = brand
+        current_product['shop_gpu_id'] = regard_id
+        current_product['vendor'] = vendor
         current_product['name'] = name
-        current_product['img'] = img
+        current_product['picture'] = img
         current_product['price'] = price
-
+        current_product['url'] = 'https://www.regard.ru/catalog/tovar' + str(regard_id) + '.htm'
+        current_product['model'] = get_regard_model(name)
         products.append(current_product)
 
     return products
+
+
+def get_regard_model(name):
+    pattern = "\(([^)]*)"
+    match = re.search(pattern, name)
+    if match:
+        return match[1]
+    else:
+        return 'delete'
+
+
+def make_path():
+    date_str = datetime.strftime(datetime.today(), '%Y-%m-%d %H-%M')
+    filename = "regard_" + date_str + ".csv"
+    full_path = os.path.join(os.path.dirname(__file__), 'data', filename)
+    normalized_path = os.path.abspath(full_path)
+    return normalized_path
 
 
 def main():
@@ -63,11 +81,11 @@ def main():
     splitted_url_parts = urlparse(BASE_URL)
 
     fetch_response_for_pagination = get_response(BASE_URL)
-    pages_to_pagse = get_links_to_parse(fetch_response_for_pagination)
+    pages_to_parse = get_links_to_parse(fetch_response_for_pagination)
 
-    for page in pages_to_pagse:
+    for page in pages_to_parse:
         url = splitted_url_parts.scheme + '://' + splitted_url_parts.netloc + page
-        print(url)
+        print(url, end=', ')
         response = get_response(url)
         print(response.status_code)
 
@@ -77,10 +95,8 @@ def main():
 
         df = pd.DataFrame.from_records(products_on_page)
         data = pd.concat([data, df], ignore_index=True, sort=False)
-    date_str = datetime.strftime(datetime.today(), '%Y-%m-%d %H-%M')
-    filename = "regard_" + date_str + ".csv"
-    full_path = os.path.join(os.path.dirname(__file__), 'data', filename)
-    normalized_path = os.path.abspath(full_path)
+
+    normalized_path = make_path()
     data.to_csv(normalized_path, encoding='UTF-8', index=False, sep=';')
 
 

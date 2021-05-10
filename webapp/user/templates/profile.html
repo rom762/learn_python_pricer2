@@ -30,7 +30,14 @@
 
                 </tbody>
             </table>
-
+            {% if subscribes %}
+            <h5>Your subscribes:</h5>
+            <ul>
+            {% for subscribe in subscribes %}
+                <li>{{ subscribe.gpu.id }}&nbsp;<a href="{{ url_for('gpu.gpu_detail', gpu_id=subscribe.gpu.id) }}">{{ subscribe.gpu.name }}</a></li>
+            {% endfor %}
+            </ul>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -49,5 +49,4 @@ def create_app():
             print('we lost user')
         return render_template('index.html', page_title=title,
                                users=users, menu=app.menu)
-
     return app
