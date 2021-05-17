@@ -17,7 +17,6 @@ blueprint = Blueprint('gpu', __name__, template_folder='templates',
 
 
 @blueprint.route('/')
-@login_required
 def gpu():
     gpus_from_db = GPU.query.all()
     gpus = []
