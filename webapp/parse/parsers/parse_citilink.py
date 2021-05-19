@@ -40,12 +40,6 @@ file_names = {
 BASE_URL = "https://www.citilink.ru/catalog/videokarty/"
 
 
-def make_final_filename():
-    filename = datetime.strftime(datetime.now(), '%Y-%m-%d-%H-%M-%S')
-    final_filename = 'citilink_' + filename + '.csv'
-    return final_filename
-
-
 def get_response(url=BASE_URL, params=None):
     try:
         response = requests.get(url, params=params)
@@ -55,12 +49,19 @@ def get_response(url=BASE_URL, params=None):
         logging.info(f'{__name__}, error: {exp}')
 
 
+def make_path():
+    date_str = datetime.strftime(datetime.today(), '%Y-%m-%d %H-%M')
+    filename = "citilink_" + date_str + ".csv"
+    full_path = os.path.join(os.path.dirname(__file__), 'data', filename)
+    normalized_path = os.path.abspath(full_path)
+    return normalized_path
+
+
 def get_html(response):
     if response.status_code == 200:
         return response.text
     else:
         logging.info(f'get_html returns response status: {response.status_code}')
-        return None
 
 
 def next_page(html):
@@ -116,7 +117,7 @@ def parse_data(html):
     return products_data
 
 
-def collect_data(page=1):
+def parse_citilink(page=1):
     final_df = pd.DataFrame()
 
     while page:
@@ -147,16 +148,20 @@ def collect_data(page=1):
         'url': 'url',
     }, axis=1, inplace=True)
 
-    final_path = os.path.join('data', make_final_filename())
 
     final_df['model'] = final_df['name'].apply(lambda x: x.split(', ')[-1].strip())
-    final_df.to_csv(final_path, sep=';', encoding='utf-8', index=False)
-    logging.info('parsing citilink is done.')
-    print('parsing citilink is done.')
 
+    final_path = os.path.join('data', make_path())
+    final_df.to_csv(final_path, sep=';', encoding='utf-8', index=False)
+    message = 'parsing citilink is done.'
+    logging.info(message)
+    print(message)
+    result = {'message': message, 'status': 'success'}
+
+    return result
 
 if __name__ == "__main__":
-    collect_data()
+    parse_citilink()
 
 
 

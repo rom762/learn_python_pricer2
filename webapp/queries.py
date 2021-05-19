@@ -1,3 +1,4 @@
+import sys
 from pprint import pprint
 from datetime import datetime
 from webapp import create_app
@@ -112,9 +113,6 @@ def get_shop_by_id(shop_id):
     return shop.name
 
 
-
-
-
 if __name__ == '__main__':
     app = create_app()
     with app.app_context():
@@ -131,7 +129,11 @@ if __name__ == '__main__':
         #     print(f'date: {datetime.strftime(gpus.created_on, "%Y-%m-%d %H-%M-%S")}')
         #     print(f'date: {type(gpus.created_on)}')
         #     print('-'*20)
-        for each in [1,2]:
+        print(app.config['SQLALCHEMY_DATABASE_URI'])
+        pprint(GPU.query.all())
+        sys.exit(0)
+        for each in [1, 2]:
+
             print(f'turn: {each}')
             price = GpuLink.query.filter(
                 GpuLink.gpu_id == 1,
