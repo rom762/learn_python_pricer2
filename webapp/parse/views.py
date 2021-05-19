@@ -1,6 +1,6 @@
 import logging
 from pprint import pprint
-from .forms import ParseForm, MultiCheckboxField, ShopsChoiceForm
+from .forms import MultiCheckboxField, ShopsChoiceForm
 from flask import (Blueprint, current_app, flash, redirect,
                    render_template, url_for, request)
 from webapp.model import db, Shop
