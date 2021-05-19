@@ -1,6 +1,6 @@
 import logging
 from pprint import pprint
-from .forms import ParseForm, MultiCheckboxField, SimpleForm
+from .forms import ParseForm, MultiCheckboxField, ShopsChoiceForm
 from flask import (Blueprint, current_app, flash, redirect,
                    render_template, url_for, request)
 from webapp.model import db, Shop
@@ -17,7 +17,7 @@ def parse_it():
         'citilink' : parse_citilink,
         'regard': parse_regard,
     }
-    form = SimpleForm()
+    form = ShopsChoiceForm()
     if form.validate_on_submit():
         print(form.example.data)
         flash('Form Validated!', 'success')
