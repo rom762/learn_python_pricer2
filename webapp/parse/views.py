@@ -8,9 +8,10 @@ from .parsers.parse_citilink import parse_citilink
 from .parsers.parse_regard import parse_regard
 blueprint = Blueprint('parse', __name__, template_folder='templates',
                       url_prefix='/parse')
-
+from flask_login import login_required
 
 @blueprint.route('/', methods=['POST', 'GET'])
+@login_required
 def parse_it():
     title = 'Let\'s parse!'
     parse_functions = {
