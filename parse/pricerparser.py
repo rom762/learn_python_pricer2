@@ -1,3 +1,7 @@
+import datetime
+import os
+from pprint import pprint
+
 import requests
 import re
 from bs4 import BeautifulSoup
@@ -6,7 +10,10 @@ from bs4 import BeautifulSoup
 class PricerParser:
 
     def __init__(self, *args, **kwargs):
+        pprint(kwargs)
+
         self.url = kwargs['url']
+        self.shop = kwargs['shop_name']
 
     def get_html(self, params=None):
         try:
@@ -24,16 +31,23 @@ class PricerParser:
     def save_to_db(self):
         pass
 
+    def make_path(self):
+        date_str = datetime.strftime(datetime.today(), '%Y-%m-%d %H-%M')
+        filename = self.shop + "_" + date_str + ".csv"
+        full_path = os.path.join(os.path.dirname(__file__), 'data', filename)
+        normalized_path = os.path.abspath(full_path)
+        return normalized_path
+
     def __str__(self):
         return f'url: {self.url}, status: {self.status}'
 
 
 class Regard(PricerParser):
-
     def __init__(self, url):
-        super().__init__(url)
         self.products = []
         self.pages = []
+        self.shop_name = 'regard'
+        self.url = url
 
     def get_pages_to_parse(self):
         html = self.get_html()
@@ -88,6 +102,9 @@ class Regard(PricerParser):
 
 
 class Citilink(PricerParser):
+    def __init__(self, url):
+        self.shop = 'citilink'
+        self.url = url
 
     def __str__(self):
         return f'{self.__class__}, {self.url}'
@@ -103,8 +120,8 @@ if __name__ == "__main__":
     regard = Regard(url=urls[1])
 
 
-    print(citilink)
+    print(f'citilink: {citilink}')
     print('-'*10)
-    print(regard)
+    print(f'regard: {regard}')
 
 

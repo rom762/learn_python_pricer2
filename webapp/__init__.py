@@ -11,6 +11,8 @@ from webapp.user.views import blueprint as user_blueprint
 from webapp.gpu.models import GPU
 from webapp.gpu.views import blueprint as gpu_blueprint
 
+from webapp.parse.views import blueprint as parse_blueprint
+
 
 def create_app():
     app = Flask(__name__)
@@ -24,6 +26,7 @@ def create_app():
     login_manager.login_view = 'user.login'
     app.register_blueprint(user_blueprint)
     app.register_blueprint(gpu_blueprint)
+    app.register_blueprint(parse_blueprint)
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -31,22 +34,16 @@ def create_app():
         return User.query.get(user_id)
 
     app.menu = {
-        'Home': '/',
         'GPU': '/gpu',
         'Register': '/user/register',
         'Login': '/user/login',
         'Profile': '/user/profile',
+        'Parse': '/parse',
     }
 
     @app.route('/')
     @app.route('/index')
     def index():
         title = 'Pricer'
-        users = User.query.all()
-        if users:
-            print(f'user counter: {len(users)}')
-        else:
-            print('we lost user')
-        return render_template('index.html', page_title=title,
-                               users=users, menu=app.menu)
+        return render_template('index.html', page_title=title, menu=app.menu)
     return app

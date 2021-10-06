@@ -75,7 +75,7 @@ def make_path():
     return normalized_path
 
 
-def main():
+def parse_regard():
     data = pd.DataFrame()
     BASE_URL = 'https://www.regard.ru/catalog/group4000.htm'
     splitted_url_parts = urlparse(BASE_URL)
@@ -98,7 +98,8 @@ def main():
 
     normalized_path = make_path()
     data.to_csv(normalized_path, encoding='UTF-8', index=False, sep=';')
+    return {'message': 'parsing regard is done', 'status': 'success'}
 
 
 if __name__ == "__main__":
-    main()
+    parse_regard()

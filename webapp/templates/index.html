@@ -2,59 +2,19 @@
 {% block content %}
 {{ super() }}
 <div class="container">
-    {% if users %}
-    <div class="row">
-        <div class="col">
-            <h1>Scores:</h1>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">#ID</th>
-                        <th scope="col">First Name</th>
-                        <th scope="col">Last Name</th>
-                        <th scope="col">City</th>
-                        <th scope="col">E-mail</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <th scope="row">{{ user['id'] }}</th>
-                        <td>{{ user['firstname'].capitalize()}}</td>
-                        <td>{{ user['lastname'].capitalize()}}</td>
-                        <td>{{ user['city'].capitalize() }}</td>
-                        <td>{{ user['email'] }}</td>
-                    </tr>
-                    {% endfor %}
-
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% elif news_list %}
-    <div class="row">
-        <div class="col">
-            <p class="lead">
-                Python News
+    <div class="px-4 py-5 my-5 text-center">
+        <h1 class="display-5 fw-bold">Pricer Project</h1>
+        <div class="col-lg-6 mx-auto">
+            <p class="lead mb-4">Учебный проект - парсер цен на видео-карты с сайтов citilink.ru, regard.ru<br>
+              Парсинг происходит раз в сутки. Цены складываются в базу данных.<br>
+              Можно подписаться на отслеживание цен на видео-карты (до трех позиций) и получать на почту или в телеграм ежедневный отчет об изменении цены.
             </p>
         </div>
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <a href="{{ url_for('gpu.gpu') }}">
+            <button type="button" class="btn btn-primary btn-lg px-4 gap-3">Выбрать видеокарты</button>
+        </a>
+      </div>
     </div>
-    <div class="row">
-        <div class="col">
-            <ul class="list-group">
-                {% for news in news_list %}
-                <li class="list-group-item">
-                    <h6><a href="{{ news.url }}">{{ news.title }}</a></h6>
-                    <p>{{ news.published }}</p>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    {% else %}
-    <div class="row">
-        <h1>Сервис временно недоступен. Попробуйте позднее.</h1>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
