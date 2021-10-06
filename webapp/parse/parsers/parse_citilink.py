@@ -14,8 +14,8 @@ from bs4 import BeautifulSoup
 logging.basicConfig(filename='parse.log', level=logging.DEBUG)
 
 parameters = {
-    'available' : '1',
-    'status': '55395790', # Это там где хит новинка распродажа конкретно этот "любой"
+    'available': '1',
+    'status': '55395790',
     'country': 'Все',
     'sorting': 'rating_desc'
 }
@@ -160,8 +160,6 @@ def parse_citilink(page=1):
 
     return result
 
+
 if __name__ == "__main__":
     parse_citilink()
-
-
-

@@ -34,7 +34,6 @@ def create_app():
         return User.query.get(user_id)
 
     app.menu = {
-        'Home': '/',
         'GPU': '/gpu',
         'Register': '/user/register',
         'Login': '/user/login',
@@ -46,11 +45,5 @@ def create_app():
     @app.route('/index')
     def index():
         title = 'Pricer'
-        users = User.query.all()
-        if users:
-            print(f'user counter: {len(users)}')
-        else:
-            print('we lost user')
-        return render_template('index.html', page_title=title,
-                               users=users, menu=app.menu)
+        return render_template('index.html', page_title=title, menu=app.menu)
     return app

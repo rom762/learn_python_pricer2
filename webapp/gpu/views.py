@@ -1,14 +1,11 @@
-import logging
-from pprint import pprint
 from decimal import Decimal
-from webapp.user.forms import RegistrationForm
 from .forms import SubscribeForm
 from webapp.user.models import User
 from webapp.model import db, Shop
 from .models import GPU, GpuPrice, GpuLink, GpuUser
 from flask import (Blueprint, current_app, flash,
-                   redirect, render_template, url_for, abort, request)
-from flask_login import current_user, login_required, login_user, logout_user
+                   redirect, render_template, abort)
+from flask_login import current_user, login_required
 from webapp.utils import get_redirect_target
 from webapp.settings import SUBSCRIBES_LIMIT
 
@@ -31,57 +28,6 @@ def gpu():
 
     return render_template(
         'gpu.html', menu=current_app.menu, title='Видеокарты', gpus=gpus)
-
-
-def first_var():
-    gpus = GPU.query.all()
-    first_var = []
-    for gpu in gpus:
-        prices = GpuPrice.query.filter(GpuPrice.gpu_id == gpu.id).order_by(GpuPrice.created_on).all()
-        prices_cleared = []
-        if prices:
-            for price in prices:
-                prices_cleared.append({'shop_id': price.shop_id,
-                                       'price': float(price.price),
-                                       })
-        elem = {'gpu_id': gpu.id,
-                'name': gpu.name,
-                'vendor': gpu.vendor,
-                'prices': prices_cleared,
-                }
-        first_var.append(elem)
-    return first_var
-
-
-def second_var():
-    gpus = GPU.query.all()
-    second_var = []
-    query = db.session.query(GPU, GpuPrice).join(
-        GpuPrice, GPU.id == GpuPrice.gpu_id,
-    )
-    return second_var
-
-
-def third_var():
-    query = db.session.query(GPU)
-    price_list = []
-    for vc in query:
-        prices = []
-        for price in vc.prices:
-            prices.append({
-                'shop_id': price.shop_id,
-                'price': float(price.price),
-            })
-
-        elem = {
-            'gpu_id': vc.id,
-            'model': vc.model,
-            'name': vc.name,
-            'vendor': vc.vendor,
-            'prices': prices,
-        }
-        price_list.append(elem)
-    return price_list
 
 
 @blueprint.route('/<int:gpu_id>')
@@ -112,9 +58,6 @@ def gpu_detail(gpu_id):
             })
 
     already_subscribed = GpuUser.query.filter(GpuUser.user_id == current_user.get_id(), GpuUser.gpu_id == video_card.id).all()
-    print(f'detail page - already_subscribed: {already_subscribed}')
-    print(f'detail page - current user id: {current_user.get_id()}')
-    print(f'detail page - gpu id: {video_card.id}')
     subscribes = GpuUser.query.filter(GpuUser.user_id == current_user.get_id()).count()
     can_subscribe = subscribes < SUBSCRIBES_LIMIT
 
@@ -130,20 +73,15 @@ def gpu_detail(gpu_id):
 @blueprint.route('/subscribe/<int:gpu_id>')
 @login_required
 def subscribe(gpu_id):
-    print(f'receive gpu id: {gpu_id}')
     user = User.query.filter(User.id == current_user.get_id()).first()
     gpu = GPU.query.filter_by(id=gpu_id).first()
-
     already_in = GpuUser.query.filter(GpuUser.user_id == user.id, GpuUser.gpu_id == gpu.id).count()
-    print(f'already in: {already_in}')
     subscribes_by_user = GpuUser.query.filter(GpuUser.user_id == user.id).count()
-    print(f'subscribes: {subscribes_by_user}')
 
     if already_in:
         flash(f'You already subscribed for {gpu.name}', 'error')
 
     elif subscribes_by_user > 2:
-        print(f'you have exceeded the limit of subscriptions')
         flash(f'You have exceeded the limit of subscriptions')
     else:
         gpu_user = GpuUser(gpu_id=gpu.id, user_id=user.id)
@@ -164,9 +102,6 @@ def unsubscribe(gpu_id):
 
     video_card = GPU.query.get(gpu_id)
 
-    for each in subscriptions.all():
-        print(f'each id: {each.id}')
-
     if subscriptions.count():
         try:
             subscriptions.delete()
@@ -178,4 +113,3 @@ def unsubscribe(gpu_id):
             print(exp, exp.args)
 
     return redirect(get_redirect_target())
-
